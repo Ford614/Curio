@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using Curio.Models;
 using Curio.Services;
@@ -104,8 +105,12 @@ namespace Curio.Test
                     throw new Exception("Registered scheme was not properly recognized as managed!");
                 }
 
-                // 6. Test Scheme Cleanup / Uninstall
-                Console.WriteLine($"[6] Deleting test scheme '{testSchemeName}'...");
+                // 6. Test Unified ImportService (Zip, Executable Filtering, Zip Slip Protection)
+                Console.WriteLine("[6] Testing Unified ImportService & Security Protections...");
+                TestImportService(tempDir, dummyCur);
+
+                // 7. Test Scheme Cleanup / Uninstall
+                Console.WriteLine($"[7] Deleting test scheme '{testSchemeName}'...");
                 var deleteLogs = new System.Collections.Generic.List<string>();
                 bool deleted = RegistrySchemeManager.DeleteScheme(testSchemeName, deleteLogs);
                 Console.WriteLine($"  - Delete success: {deleted}");
@@ -131,6 +136,68 @@ namespace Curio.Test
                 }
                 RegistrySchemeManager.StorageDirectory = RegistrySchemeManager.GetDefaultStorageDirectory();
             }
+        }
+
+        private static void TestImportService(string tempDir, byte[] dummyCurBytes)
+        {
+            // Create a test zip file containing:
+            // 1. normal_cursor.cur
+            // 2. animated_cursor.ani
+            // 3. install_setup.inf
+            // 4. malicious_virus.exe (SHOULD BE BLOCKED)
+            // 5. dangerous_script.bat (SHOULD BE BLOCKED)
+            string zipPath = Path.Combine(tempDir, "test_pack.zip");
+
+            using (var zipStream = new FileStream(zipPath, FileMode.Create))
+            using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+            {
+                // Add valid cursor
+                var entryCur = archive.CreateEntry("normal_cursor.cur");
+                using (var s = entryCur.Open()) s.Write(dummyCurBytes);
+
+                // Add valid animated cursor
+                var entryAni = archive.CreateEntry("subfolder/animated_cursor.ani");
+                using (var s = entryAni.Open()) s.Write(dummyCurBytes);
+
+                // Add inf file
+                var entryInf = archive.CreateEntry("install_setup.inf");
+                using (var writer = new StreamWriter(entryInf.Open())) writer.WriteLine("; INF file");
+
+                // Add forbidden executable (.exe)
+                var entryExe = archive.CreateEntry("malicious_virus.exe");
+                using (var writer = new StreamWriter(entryExe.Open())) writer.WriteLine("DUMMY EXE CONTENT");
+
+                // Add forbidden batch file (.bat)
+                var entryBat = archive.CreateEntry("dangerous_script.bat");
+                using (var writer = new StreamWriter(entryBat.Open())) writer.WriteLine("DUMMY BAT CONTENT");
+            }
+
+            Console.WriteLine("  - Created test zip package with valid cursors and forbidden executables.");
+
+            // Import the zip package using ImportService
+            var importResult = ImportService.ProcessImport(new[] { zipPath });
+
+            Console.WriteLine($"  - ImportResult: {importResult.ImportedFiles.Count} cursors imported, {importResult.SkippedExecutablesCount} executables blocked.");
+
+            if (importResult.SkippedExecutablesCount < 2)
+            {
+                throw new Exception($"Executable filtering failed! Expected at least 2 blocked, got {importResult.SkippedExecutablesCount}");
+            }
+
+            if (importResult.ImportedFiles.Count < 2)
+            {
+                throw new Exception($"Zip cursor extraction failed! Expected 2 cursors, got {importResult.ImportedFiles.Count}");
+            }
+
+            // Verify no .exe or .bat were imported
+            if (importResult.ImportedFiles.Any(f => f.Extension.Equals(".exe", StringComparison.OrdinalIgnoreCase) || f.Extension.Equals(".bat", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new Exception("SECURITY FAILURE: Executable file was imported into cursor list!");
+            }
+
+            // Clean up temp extracts
+            ImportService.CleanTempExtracts();
+            Console.WriteLine("  - Security checks and Zip extraction PASSED!");
         }
 
         private static byte[] CreateDummyCursorBytes()

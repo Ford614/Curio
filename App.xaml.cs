@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using Curio.Test;
@@ -7,6 +9,8 @@ namespace Curio
 {
     public partial class App : Application
     {
+        public static List<string> StartupFilePaths { get; } = new();
+
         protected override void OnStartup(StartupEventArgs e)
         {
             if (e.Args.Contains("--test", StringComparer.OrdinalIgnoreCase))
@@ -22,6 +26,15 @@ namespace Curio
                     Console.WriteLine($"[Test Failure] {ex}");
                     Shutdown(1);
                     return;
+                }
+            }
+
+            // Capture startup file paths passed via "Open With", Drag & Drop to EXE, or Command Line
+            foreach (var arg in e.Args)
+            {
+                if (File.Exists(arg) || Directory.Exists(arg))
+                {
+                    StartupFilePaths.Add(arg);
                 }
             }
 
