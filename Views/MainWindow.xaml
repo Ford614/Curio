@@ -90,30 +90,74 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Left Sidebar: Subfolders / Scanned Files -->
-                        <GroupBox Grid.Column="0" Header="検出フォルダ / ファイル">
-                            <Grid Margin="4">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
+<Grid Grid.Column="0" Margin="4">
 
-                                <StackPanel Grid.Row="0" Margin="0,0,0,6">
-                                    <TextBlock x:Name="ScanSummaryTextBlock" Text="フォルダ選択またはドラッグ＆ドロップしてください" FontSize="11" Foreground="#475569" TextWrapping="Wrap"/>
-                                    <ComboBox x:Name="FolderGroupComboBox" Margin="0,6,0,0" DisplayMemberPath="Key" SelectionChanged="FolderGroupComboBox_SelectionChanged" Visibility="Collapsed"/>
-                                </StackPanel>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
 
-                                <ListBox Grid.Row="1" x:Name="DetectedFilesListBox" SelectionChanged="DetectedFilesListBox_SelectionChanged">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Margin="2">
-                                                <Image Source="{Binding Preview}" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding RelativePath}" VerticalAlignment="Center" FontSize="11"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </Grid>
-                        </GroupBox>
+    <TextBlock Grid.Row="0"
+               x:Name="ScanSummaryTextBlock"
+               Text="フォルダ選択またはドラッグ＆ドロップしてください"
+               FontSize="11"
+               Foreground="#475569"
+               TextWrapping="Wrap"/>
+
+    <ComboBox Grid.Row="1"
+              x:Name="FolderGroupComboBox"
+              Margin="0,6,0,6"
+              DisplayMemberPath="Key"
+              SelectionChanged="FolderGroupComboBox_SelectionChanged"
+              Visibility="Collapsed"/>
+
+    <TextBlock Grid.Row="2"
+               Text="検出されたファイル"
+               FontWeight="SemiBold"
+               Margin="0,0,0,6"/>
+
+    <Border Grid.Row="3"
+            BorderBrush="#E2E8F0"
+            BorderThickness="1"
+            CornerRadius="4"
+            Background="#FFFFFF"
+            VerticalAlignment="Stretch">
+
+        <ListBox x:Name="DetectedFilesListBox"
+                 SelectionChanged="DetectedFilesListBox_SelectionChanged"
+                 BorderThickness="0">
+
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <Image Source="{Binding Preview}"
+                               Width="20"
+                               Height="20"
+                               Margin="0,0,6,0"
+                               VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding RelativePath}"
+                                   VerticalAlignment="Center"
+                                   FontSize="11"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+
+        </ListBox>
+
+    </Border>
+
+    <Button Grid.Row="4"
+            Content="検出ファイルをクリア"
+            Click="ClearDetectedFiles_Click"
+            Margin="0,8,0,0"
+            Padding="8,5"
+            HorizontalAlignment="Stretch"
+            ToolTip="検出されたファイルをすべてクリア"/>
+
+</Grid>
 
                         <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="#E2E8F0"/>
 
@@ -341,10 +385,116 @@
             </TabItem>
             <!-- Tab 5: Settings -->
             <TabItem Header="⚙️ 設定">
-                <Grid Margin="10">
-                    <TextBlock Text="アプリの設定を管理できます。" FontSize="14" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Grid>
-            </TabItem>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20" MaxWidth="700">
+
+            <!-- Header -->
+            <TextBlock Text="設定"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="#1E293B"/>
+
+            <TextBlock Text="Curioの動作や表示に関する設定を変更できます。"
+                       FontSize="12"
+                       Foreground="#64748B"
+                       Margin="0,4,0,20"/>
+
+            <!-- 一般 -->
+            <GroupBox Header="一般" Padding="12" Margin="0,0,0,12">
+                <StackPanel>
+
+                    <TextBlock Text="デフォルトURL"
+                               FontWeight="SemiBold"/>
+
+                    <TextBlock Text="Webタブを開いたときに使用するURLです。"
+                               FontSize="11"
+                               Foreground="#64748B"
+                               Margin="0,2,0,6"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox x:Name="SettingsDefaultUrlTextBox"
+                                 Grid.Column="0"
+                                 Padding="8,6"/>
+
+                        <Button Grid.Column="1"
+                                Content="保存"
+                                Click="SettingsSaveDefaultUrl_Click"
+                                Margin="8,0,0,0"
+                                Padding="16,5"/>
+                    </Grid>
+
+                </StackPanel>
+            </GroupBox>
+
+            <!-- 外観 -->
+            <GroupBox Header="外観" Padding="12" Margin="0,0,0,12">
+                <StackPanel>
+
+                    <TextBlock Text="テーマ"
+                               FontWeight="SemiBold"/>
+
+                    <TextBlock Text="Curioの表示テーマを選択します。"
+                               FontSize="11"
+                               Foreground="#64748B"
+                               Margin="0,2,0,6"/>
+
+                    <ComboBox x:Name="ThemeComboBox"
+                              Width="180"
+                              HorizontalAlignment="Left">
+                        <ComboBoxItem Content="システム"/>
+                        <ComboBoxItem Content="ライト"/>
+                        <ComboBoxItem Content="ダーク"/>
+                    </ComboBox>
+
+                </StackPanel>
+            </GroupBox>
+
+            <!-- サポート -->
+            <GroupBox Header="サポート" Padding="12" Margin="0,0,0,12">
+                <StackPanel>
+
+                    <Button Content="❤  開発者を支援する"
+                            Click="Donate_Click"
+                            HorizontalAlignment="Left"
+                            Padding="16,7"
+                            Margin="0,0,0,8"/>
+
+                    <Button Content="✉  サポートに連絡"
+                            Click="SupportEmail_Click"
+                            HorizontalAlignment="Left"
+                            Padding="16,7"
+                            Margin="0,0,0,8"/>
+
+                    <Button Content="GitHub"
+                            Click="GitHub_Click"
+                            HorizontalAlignment="Left"
+                            Padding="16,7"/>
+
+                </StackPanel>
+            </GroupBox>
+
+            <!-- バージョン -->
+            <GroupBox Header="バージョン情報" Padding="12">
+                <StackPanel>
+                    <TextBlock Text="Curio"
+                               FontWeight="Bold"
+                               FontSize="16"/>
+
+                    <TextBlock Text="バージョン 1.0.0"
+                               FontSize="12"
+                               Foreground="#64748B"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+            </GroupBox>
+
+        </StackPanel>
+    </ScrollViewer>
+</TabItem>
         </TabControl>
 
         <GridSplitter Grid.Row="2" Height="4" HorizontalAlignment="Stretch" Background="#CBD5E1"/>

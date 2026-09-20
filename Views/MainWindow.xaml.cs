@@ -11,6 +11,7 @@ using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 using Curio.Models;
 using Curio.Services;
+using System.Diagnostics;
 
 namespace Curio.Views
 {
@@ -31,7 +32,7 @@ public MainWindow()
     DataContext = this;
 
     WebUrlTextBox.Text = _settings.DefaultUrl;
-
+    SettingsDefaultUrlTextBox.Text = _settings.DefaultUrl;
     StoragePathTextBox.Text = RegistrySchemeManager.StorageDirectory;
     InstalledSchemesListView.ItemsSource = InstalledSchemes;
 
@@ -356,6 +357,19 @@ private void NavigateWebUrl(string url)
 
         #region Original Batch Installer & Scheme Management Logic
 
+private void ClearDetectedFiles_Click(object sender, RoutedEventArgs e)
+{
+    ScannedFiles.Clear();
+
+    foreach (var mapping in RoleMappings)
+    {
+        mapping.SelectedFile = null;
+    }
+
+    ScanSummaryTextBlock.Text = "フォルダ選択またはドラッグ＆ドロップしてください";
+
+    AppendLog("[インポート一覧] 検出されたファイルをクリアしました。");
+}
         private void InitializeRoleMappings()
         {
             RoleMappings.Clear();
@@ -685,7 +699,62 @@ private void NavigateWebUrl(string url)
             LogTextBox.AppendText($"[{timeStamp}] {message}\n");
             LogTextBox.ScrollToEnd();
         }
-
         #endregion
+         #region Settings Tab Handlers
+
+private void SettingsSaveDefaultUrl_Click(object sender, RoutedEventArgs e)
+{
+    string url = SettingsDefaultUrlTextBox.Text.Trim();
+
+    if (string.IsNullOrWhiteSpace(url))
+    {
+        MessageBox.Show(
+            "URLを入力してください。",
+            "設定",
+            MessageBoxButton.OK,
+            MessageBoxImage.Warning);
+
+        return;
+    }
+
+    _settings.DefaultUrl = url;
+    _settings.Save();
+
+    WebUrlTextBox.Text = url;
+
+    MessageBox.Show(
+        "デフォルトURLを保存しました。",
+        "設定",
+        MessageBoxButton.OK,
+        MessageBoxImage.Information);
+}
+private void SupportEmail_Click(object sender, RoutedEventArgs e)
+{
+    try
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "ford614.dev@gmail.com",
+            UseShellExecute = true
+        });
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show(
+            $"メールアプリを開けませんでした。\n{ex.Message}",
+            "サポート",
+            MessageBoxButton.OK,
+            MessageBoxImage.Warning);
+    }
+}
+private void GitHub_Click(object sender, RoutedEventArgs e)
+{
+    Process.Start(new ProcessStartInfo
+    {
+        FileName = "https://github.com/Ford614/Curio",
+        UseShellExecute = true
+    });
+}
+              #endregion
     }
 }
