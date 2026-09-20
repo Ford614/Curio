@@ -1,0 +1,68 @@
+Curio Source Available License
+Version 1.0
+
+Copyright (c) 2026 Ford614
+
+1. Permission
+
+Permission is granted to any person obtaining a copy of the
+Curio source code to:
+
+* View and study the source code.
+* Fork the repository on GitHub.
+* Modify the source code for personal, non-commercial use.
+* Create and submit issues, pull requests, and other contributions.
+* Build and run modified versions for personal, non-commercial use.
+
+2. Restrictions
+
+The following activities are not permitted without prior written
+permission from the copyright holder:
+
+* Redistributing Curio or any modified version of Curio.
+* Distributing compiled binaries or installers of Curio or
+  modified versions of Curio.
+* Selling Curio or any modified version of Curio.
+* Using Curio or its source code as part of a commercial product
+  or service.
+* Publishing a modified version of Curio for download or
+  distribution.
+* Using the name "Curio", its logo, or other official branding
+  to represent an unofficial or modified version.
+
+3. Official Distribution
+
+The official Curio releases are distributed only through the
+official Curio GitHub repository and its official release pages.
+
+Third parties may not redistribute official Curio releases
+without prior written permission.
+
+4. Contributions
+
+Contributions submitted through GitHub issues, pull requests,
+or other official project channels may be incorporated into
+Curio at the discretion of the project maintainers.
+
+By submitting a contribution, the contributor represents that
+they have the right to submit the contribution under the terms
+applicable to the Curio project.
+
+5. Copyright
+
+All rights not expressly granted by this license are reserved
+by the copyright holder.
+
+6. No Warranty
+
+Curio is provided "AS IS", without warranty of any kind, express
+or implied. The copyright holder and contributors are not liable
+for any claim, damages, or other liability arising from the use
+of the software.
+
+7. Contact
+
+Requests for permission to redistribute, commercially use, or
+otherwise use Curio outside the permissions granted by this
+license should be directed to the project maintainer through
+the official Curio GitHub repository.
