@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using System.Linq;
-using MouseCursorCustom.Models;
-using MouseCursorCustom.Services;
+using Curio.Models;
+using Curio.Services;
 
-namespace MouseCursorCustom.Test
+namespace Curio.Test
 {
     public static class TestRunner
     {
         public static void RunTests()
         {
-            Console.WriteLine("=== MouseCursorCustom Functional Verification ===");
+            Console.WriteLine("=== Curio Functional Verification ===");
 
-            string tempDir = Path.Combine(Path.GetTempPath(), "MouseCursorCustom_Test_" + Guid.NewGuid().ToString("N"));
-            string customStorageDir = Path.Combine(Path.GetTempPath(), "MouseCursorCustom_Storage_" + Guid.NewGuid().ToString("N"));
+            string tempDir = Path.Combine(Path.GetTempPath(), "Curio_Test_" + Guid.NewGuid().ToString("N"));
+            string customStorageDir = Path.Combine(Path.GetTempPath(), "Curio_Storage_" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempDir);
             Directory.CreateDirectory(customStorageDir);
 
@@ -70,7 +70,7 @@ namespace MouseCursorCustom.Test
                 }
 
                 // 5. Test Scheme Installation & Registry Management
-                string testSchemeName = "UnitTest_Scheme_" + DateTime.Now.Ticks;
+                string testSchemeName = "UnitTest_CurioScheme_" + DateTime.Now.Ticks;
                 Console.WriteLine($"[5] Installing test scheme '{testSchemeName}'...");
 
                 var installResult = RegistrySchemeManager.InstallScheme(testSchemeName, mappings, applyImmediately: false);
@@ -117,7 +117,7 @@ namespace MouseCursorCustom.Test
                     throw new Exception("Scheme still exists in registry after delete!");
                 }
 
-                Console.WriteLine("=== All Functional Verification Tests PASSED! ===");
+                Console.WriteLine("=== All Curio Verification Tests PASSED! ===");
             }
             finally
             {

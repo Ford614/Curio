@@ -6,7 +6,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace MouseCursorCustom.Services
+namespace Curio.Services
 {
     public static class CursorPreviewRenderer
     {

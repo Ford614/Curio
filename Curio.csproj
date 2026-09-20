@@ -6,9 +6,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <Title>マウスカーソル一括インストーラー</Title>
-    <AssemblyTitle>Mouse Cursor Batch Installer</AssemblyTitle>
-    <Product>MouseCursorCustom</Product>
+    <StartupObject>Curio.App</StartupObject>
+    <Title>Curio - マウスカーソル一括インストーラー</Title>
+    <AssemblyTitle>Curio</AssemblyTitle>
+    <Product>Curio</Product>
   </PropertyGroup>
 
 </Project>

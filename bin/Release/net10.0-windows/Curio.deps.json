@@ -6,15 +6,15 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v10.0": {
-      "MouseCursorCustom/1.0.0": {
+      "Curio/1.0.0": {
         "runtime": {
-          "MouseCursorCustom.dll": {}
+          "Curio.dll": {}
         }
       }
     }
   },
   "libraries": {
-    "MouseCursorCustom/1.0.0": {
+    "Curio/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

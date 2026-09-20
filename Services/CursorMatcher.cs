@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MouseCursorCustom.Models;
+using Curio.Models;
 
-namespace MouseCursorCustom.Services
+namespace Curio.Services
 {
     public static class CursorMatcher
     {

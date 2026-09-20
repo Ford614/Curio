@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MouseCursorCustom.Models
+namespace Curio.Models
 {
     public class CursorRole
     {

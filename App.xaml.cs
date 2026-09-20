@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using System.Windows;
-using MouseCursorCustom.Test;
+using Curio.Test;
 
-namespace MouseCursorCustom
+namespace Curio
 {
     public partial class App : Application
     {

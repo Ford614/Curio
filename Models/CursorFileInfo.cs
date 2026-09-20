@@ -1,6 +1,6 @@
 using System.Windows.Media;
 
-namespace MouseCursorCustom.Models
+namespace Curio.Models
 {
     public class CursorFileInfo
     {

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "S:\\Work\\Program\\Projects\\App\\MouseCursorCustom\\MouseCursorCustom.csproj": {}
+    "S:\\Work\\Program\\Projects\\App\\Curio\\Curio.csproj": {}
   },
   "projects": {
-    "S:\\Work\\Program\\Projects\\App\\MouseCursorCustom\\MouseCursorCustom.csproj": {
+    "S:\\Work\\Program\\Projects\\App\\Curio\\Curio.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "S:\\Work\\Program\\Projects\\App\\MouseCursorCustom\\MouseCursorCustom.csproj",
-        "projectName": "MouseCursorCustom",
-        "projectPath": "S:\\Work\\Program\\Projects\\App\\MouseCursorCustom\\MouseCursorCustom.csproj",
+        "projectUniqueName": "S:\\Work\\Program\\Projects\\App\\Curio\\Curio.csproj",
+        "projectName": "Curio",
+        "projectPath": "S:\\Work\\Program\\Projects\\App\\Curio\\Curio.csproj",
         "packagesPath": "C:\\Users\\kunis\\.nuget\\packages\\",
-        "outputPath": "S:\\Work\\Program\\Projects\\App\\MouseCursorCustom\\obj\\",
+        "outputPath": "S:\\Work\\Program\\Projects\\App\\Curio\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

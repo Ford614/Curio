@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace MouseCursorCustom.Views
+namespace Curio.Views
 {
     public enum OverwriteOption
     {

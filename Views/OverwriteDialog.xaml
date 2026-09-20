@@ -1,4 +1,4 @@
-<Window x:Class="MouseCursorCustom.Views.OverwriteDialog"
+<Window x:Class="Curio.Views.OverwriteDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="同名スキームの確認" Height="240" Width="440"

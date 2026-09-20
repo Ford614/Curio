@@ -1,6 +1,6 @@
-# マウスカーソル一括インストーラー (Mouse Cursor Batch Installer)
+# Curio - マウスカーソル一括インストーラー
 
-Windows 10 / 11 向けのマウスカーソル一括登録 GUI アプリケーションです。  
+`Curio` は Windows 10 / 11 向けのマウスカーソル一括登録 GUI アプリケーションです。  
 指定したフォルダ（およびサブフォルダ）内にある大量の `.cur` / `.ani` ファイルを自動検出・キーワード分類し、Windowsの「マウスのプロパティ → ポインター → デザイン」から選択可能な**カーソルスキーム（デザイン）**として一括登録・管理することができます。
 
 ---
@@ -17,8 +17,8 @@ Windows 10 / 11 向けのマウスカーソル一括登録 GUI アプリケー�
    - `.cur` および `.ani` のプレビュー画像をアイコン付きで一覧表示。
 4. **管理者権限 (UAC) 不要**
    - ユーザー単位のレジストリ (`HKCU\Control Panel\Cursors\Schemes`) および指定保存先フォルダを使用するため、管理者権限なしで安全に利用可能。
-5. **保存先フォルダの設定機能 (新機能)**
-   - 一括インストールするカーソル実体ファイルの保管フォルダを自由に変更・リセット可能（デフォルト: `%LOCALAPPDATA%\MouseCursorInstaller\Schemes\`）。
+5. **保存先フォルダの設定機能**
+   - 一括インストールするカーソル実体ファイルの保管フォルダを自由に変更・リセット可能（デフォルト: `%LOCALAPPDATA%\Curio\Schemes\`）。
 6. **元ファイルを変更・削除しない安全設計**
    - 元のカーソルファイルは複製してアプリ指定フォルダに保存するため、元のファイルを移動・削除してもスキームが壊れません。
 7. **複数スキームの登録 & 同名確認**
@@ -46,19 +46,20 @@ Windows 10 / 11 向けのマウスカーソル一括登録 GUI アプリケー�
 
 1. **プロジェクトフォルダへ移動**
    ```powershell
-   cd s:\Work\Program\Projects\App\MouseCursorCustom
+   cd s:\Work\Program\Projects\App\Curio
    ```
 
 2. **リリースビルドの実行**
    ```powershell
    dotnet build -c Release
    ```
-   ビルド成果物は `bin\Release\net10.0-windows\MouseCursorCustom.exe` に出力されます。
+   ビルド成果物は `bin\Release\net10.0-windows\Curio.exe` に出力されます。
 
 3. **単一 EXE ファイルとしてのパブリッシュ (配布用)**
    ```powershell
    dotnet publish -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true
    ```
+   `bin\Release\net10.0-windows\win-x64\publish\Curio.exe` に単一実行ファイルが生成されます。
 
 ---
 
@@ -66,7 +67,7 @@ Windows 10 / 11 向けのマウスカーソル一括登録 GUI アプリケー�
 
 ### 1. カーソルの一括登録
 
-1. `MouseCursorCustom.exe` を起動します。
+1. `Curio.exe` を起動します。
 2. 「入力フォルダパス」の「参照...」ボタンをクリックし、カーソルファイル (`.cur` / `.ani`) が入ったフォルダを選択します。
 3. 必要に応じて「📁 保存先フォルダ」を変更・指定します（「初期値に戻す」でデフォルトに戻せます）。
 4. 「🔍 カーソル検索」をクリックすると、フォルダ内からカーソルを検出します。
@@ -86,4 +87,4 @@ Windows 10 / 11 向けのマウスカーソル一括登録 GUI アプリケー�
 - **レジストリ登録箇所**:  
   `HKEY_CURRENT_USER\Control Panel\Cursors\Schemes`
 - **デフォルト保存先**:  
-  `%LOCALAPPDATA%\MouseCursorInstaller\Schemes\<スキーム名>\` （画面上から自由に変更可能）
+  `%LOCALAPPDATA%\Curio\Schemes\<スキーム名>\` （画面上から自由に変更可能）

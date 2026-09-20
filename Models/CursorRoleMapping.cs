@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
-namespace MouseCursorCustom.Models
+namespace Curio.Models
 {
     public class CursorRoleMapping : INotifyPropertyChanged
     {

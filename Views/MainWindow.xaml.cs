@@ -6,10 +6,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
-using MouseCursorCustom.Models;
-using MouseCursorCustom.Services;
+using Curio.Models;
+using Curio.Services;
 
-namespace MouseCursorCustom.Views
+namespace Curio.Views
 {
     public partial class MainWindow : Window
     {
@@ -30,7 +30,7 @@ namespace MouseCursorCustom.Views
             InitializeRoleMappings();
             LoadInstalledSchemes();
 
-            AppendLog("アプリケーションを起動しました。フォルダを選択してスキャンを実行してください。");
+            AppendLog("Curio アプリケーションを起動しました。フォルダを選択してスキャンを実行してください。");
         }
 
         private void InitializeRoleMappings()

@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
-using MouseCursorCustom.Models;
+using Curio.Models;
 
-namespace MouseCursorCustom.Services
+namespace Curio.Services
 {
     public class InstallResult
     {
@@ -34,7 +34,7 @@ namespace MouseCursorCustom.Services
         public static string GetDefaultStorageDirectory()
         {
             string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            return Path.Combine(localAppData, "MouseCursorInstaller", "Schemes");
+            return Path.Combine(localAppData, "Curio", "Schemes");
         }
 
         public static string StorageDirectory
@@ -64,6 +64,7 @@ namespace MouseCursorCustom.Services
 
             string baseAppDir = StorageDirectory;
             string defaultAppDir = GetDefaultStorageDirectory();
+            string oldAppDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MouseCursorInstaller", "Schemes");
 
             foreach (string valueName in key.GetValueNames())
             {
@@ -73,7 +74,8 @@ namespace MouseCursorCustom.Services
                     var paths = regStr.Split(',').ToList();
                     bool managed = paths.Any(p => !string.IsNullOrEmpty(p) && 
                         (p.StartsWith(baseAppDir, StringComparison.OrdinalIgnoreCase) || 
-                         p.StartsWith(defaultAppDir, StringComparison.OrdinalIgnoreCase)));
+                         p.StartsWith(defaultAppDir, StringComparison.OrdinalIgnoreCase) ||
+                         p.StartsWith(oldAppDir, StringComparison.OrdinalIgnoreCase)));
 
                     result.Add(new InstalledSchemeInfo
                     {
