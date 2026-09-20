@@ -1,0 +1,276 @@
+<Window x:Class="MouseCursorCustom.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="マウスカーソル一括インストーラー" Height="760" Width="1040"
+        WindowStartupLocation="CenterScreen" UseLayoutRounding="True">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Header -->
+            <RowDefinition Height="*"/>    <!-- Main Tab Area -->
+            <RowDefinition Height="Auto"/> <!-- Splitter -->
+            <RowDefinition Height="140"/>  <!-- Log Panel -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#F0F4F9" CornerRadius="6" Padding="16,10" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="🖱️ マウスカーソル一括インストーラー" FontSize="18" FontWeight="Bold" Foreground="#1E293B"/>
+                    <TextBlock Text="大量の .cur / .ani ファイルを自動検出し、Windowsのマウスカーソルデザイン（スキーム）として一括登録します。" FontSize="12" Foreground="#64748B" Margin="0,2,0,0"/>
+                </StackPanel>
+                <TextBlock Grid.Column="1" Text="管理者権限不要 (HKCU)" VerticalAlignment="Center" Foreground="#059669" FontWeight="SemiBold" Background="#D1FAE5" Padding="8,4" Margin="0"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <TabControl Grid.Row="1" x:Name="MainTabControl" SelectionChanged="MainTabControl_SelectionChanged">
+            
+            <!-- Tab 1: Batch Installer -->
+            <TabItem Header="📂 カーソル一括登録">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> <!-- Folder Picker -->
+                        <RowDefinition Height="*"/>    <!-- Split View: Subfolder / Files & Mapping -->
+                        <RowDefinition Height="Auto"/> <!-- Install Bar -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Folder Picker Bar -->
+                    <Border Grid.Row="0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="入力フォルダパス:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                            <TextBox Grid.Column="1" x:Name="FolderPathTextBox" VerticalAlignment="Center" Padding="6,4"/>
+                            <Button Grid.Column="2" Content="参照..." Click="BrowseFolder_Click" Margin="6,0,0,0"/>
+                            <CheckBox Grid.Column="3" x:Name="SubfoldersCheckBox" Content="サブフォルダも検索" IsChecked="True" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                            <Button Grid.Column="4" Content="🔍 カーソル検索" Click="ScanButton_Click" Background="#2563EB" Foreground="White" FontWeight="Bold" Margin="12,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Mapping & Preview Area -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="260"/> <!-- Folder/File list sidebar -->
+                            <ColumnDefinition Width="6"/>   <!-- Splitter -->
+                            <ColumnDefinition Width="*"/>   <!-- Role Mapping Table -->
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left Sidebar: Subfolders / Scanned Files -->
+                        <GroupBox Grid.Column="0" Header="検出フォルダ / ファイル">
+                            <Grid Margin="4">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Margin="0,0,0,6">
+                                    <TextBlock x:Name="ScanSummaryTextBlock" Text="フォルダを選択してください" FontSize="11" Foreground="#475569" TextWrapping="Wrap"/>
+                                    <ComboBox x:Name="FolderGroupComboBox" Margin="0,6,0,0" DisplayMemberPath="Key" SelectionChanged="FolderGroupComboBox_SelectionChanged" Visibility="Collapsed"/>
+                                </StackPanel>
+
+                                <ListBox Grid.Row="1" x:Name="DetectedFilesListBox" SelectionChanged="DetectedFilesListBox_SelectionChanged">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="2">
+                                                <Image Source="{Binding Preview}" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding RelativePath}" VerticalAlignment="Center" FontSize="11"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </GroupBox>
+
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="#E2E8F0"/>
+
+                        <!-- Right Area: Role Mapping Table -->
+                        <GroupBox Grid.Column="2" Header="カーソル役割割り当て (自動検出済み)">
+                            <DataGrid x:Name="RoleMappingDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#F1F5F9">
+                                <DataGrid.Columns>
+                                    <!-- Role Icon Preview -->
+                                    <DataGridTemplateColumn Header="プレビュー" Width="70">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Width="36" Height="36" Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2">
+                                                    <Image Source="{Binding Preview}" Width="32" Height="32" Stretch="Uniform"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!-- Role Name -->
+                                    <DataGridTemplateColumn Header="カーソル役割 (Windows標準)" Width="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel VerticalAlignment="Center" Margin="4">
+                                                    <TextBlock Text="{Binding Role.DisplayName}" FontWeight="Bold" FontSize="12"/>
+                                                    <TextBlock Text="{Binding Role.Description}" FontSize="10" Foreground="#64748B"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!-- Assigned File Picker -->
+                                    <DataGridTemplateColumn Header="割り当てファイル (.cur / .ani)" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <ComboBox Grid.Column="0" ItemsSource="{Binding DataContext.ScannedFiles, RelativeSource={RelativeSource AncestorType=Window}}" SelectedItem="{Binding SelectedFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                                                    <Button Grid.Column="1" Content="参照" Click="BrowseSingleFile_Click" Margin="4,0,0,0" ToolTip="個別ファイルを選択"/>
+                                                    <Button Grid.Column="2" Content="解除" Click="ClearMapping_Click" Margin="4,0,0,0" ToolTip="割り当てを解除"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </GroupBox>
+                    </Grid>
+
+                    <!-- Bottom Install Options Bar -->
+                    <Border Grid.Row="2" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,10,0,0">
+                        <StackPanel>
+                            <!-- Storage Path Configuration Row -->
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="📁 保存先フォルダ:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0" ToolTip="登録したスキームのカーソルファイルが保管されるフォルダ"/>
+                                <TextBox Grid.Column="1" x:Name="StoragePathTextBox" VerticalAlignment="Center" Padding="4,2" TextChanged="StoragePathTextBox_TextChanged"/>
+                                <Button Grid.Column="2" Content="変更..." Click="BrowseStorageFolder_Click" Margin="6,0,0,0"/>
+                                <Button Grid.Column="3" Content="初期値に戻す" Click="ResetStorageFolder_Click" Margin="4,0,0,0"/>
+                            </Grid>
+
+                            <!-- Scheme Name & Action Row -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="220"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="登録スキーム名:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
+                                <TextBox Grid.Column="1" x:Name="SchemeNameTextBox" VerticalAlignment="Center" Padding="6,4" FontSize="13" Text="カスタムカーソル"/>
+
+                                <CheckBox Grid.Column="2" x:Name="ApplyImmediatelyCheckBox" Content="インストール後にこのスキームを今すぐ適用する" IsChecked="True" VerticalAlignment="Center" Margin="16,0,0,0"/>
+
+                                <Button Grid.Column="3" Content="⚡ 一括インストール" Click="InstallButton_Click" Background="#16A34A" Foreground="White" FontWeight="Bold" FontSize="14" Padding="16,6"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 2: Manage Installed Schemes -->
+            <TabItem Header="⚙️ 登録済みスキーム管理">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="現在Windows（レジストリ）に登録されているカーソルスキーム一覧です。選択して削除（アンインストール）や適用が行えます。" Margin="0,0,0,10" Foreground="#475569"/>
+
+                    <ListView Grid.Row="1" x:Name="InstalledSchemesListView" SelectionChanged="InstalledSchemesListView_SelectionChanged">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="スキーム名" Width="220">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <Border Visibility="{Binding IsCurrentActive, Converter={StaticResource BooleanToVisibilityConverter}}" Background="#DCFCE7" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="3" Margin="8,0,0,0" Padding="4,1">
+                                                    <TextBlock Text="現在適用中" Foreground="#166534" FontSize="10" FontWeight="Bold"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Header="アプリ管理" Width="100">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding IsManagedByApp, StringFormat={}{0}}" VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsManagedByApp}" Value="True">
+                                                                <Setter Property="Text" Value="本アプリ登録"/>
+                                                                <Setter Property="Foreground" Value="#2563EB"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsManagedByApp}" Value="False">
+                                                                <Setter Property="Text" Value="外部/システム"/>
+                                                                <Setter Property="Foreground" Value="#64748B"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Header="登録レジストリデータ (一部)" Width="500">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding RawRegistryString}" TextTrimming="CharacterEllipsis" Foreground="#64748B" FontSize="11" ToolTip="{Binding RawRegistryString}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                    <!-- Management Bar -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button Content="🔄 一覧更新" Click="RefreshInstalledSchemes_Click" Margin="0,0,8,0"/>
+                        <Button x:Name="ApplySelectedSchemeButton" Content="今すぐ適用" Click="ApplySelectedScheme_Click" IsEnabled="False" Margin="0,0,8,0"/>
+                        <Button x:Name="DeleteSelectedSchemeButton" Content="❌ 選択したスキームを削除" Click="DeleteSelectedScheme_Click" IsEnabled="False" Background="#EF4444" Foreground="White" FontWeight="Bold"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <GridSplitter Grid.Row="2" Height="4" HorizontalAlignment="Stretch" Background="#CBD5E1"/>
+
+        <!-- Bottom Log Output Panel -->
+        <GroupBox Grid.Row="3" Header="処理ログ / 実行結果">
+            <Grid Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBox Grid.Row="0" x:Name="LogTextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas, Cascadia Code, Courier New" FontSize="11" Background="#0F172A" Foreground="#F8FAFC" Padding="6"/>
+                <Button Grid.Row="1" Content="ログクリア" Click="ClearLog_Click" HorizontalAlignment="Right" Margin="0,4,0,0"/>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>
