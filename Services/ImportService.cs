@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using Curio.Models;
+using System.Text;
 
 namespace Curio.Services
 {
@@ -177,7 +178,12 @@ namespace Curio.Services
 
                 long totalExtractedBytes = 0;
 
-                using (var archive = ZipFile.OpenRead(zipFilePath))
+using (var archive = ZipFile.Open(
+    zipFilePath,
+    ZipArchiveMode.Read,
+    Encoding.GetEncoding(932)))
+{
+{
                 {
                     foreach (var entry in archive.Entries)
                     {
@@ -238,7 +244,7 @@ namespace Curio.Services
                 }
 
                 result.LogMessages.Add($"[完了] ZIPの展開が完了しました: {Path.GetFileName(zipFilePath)}");
-            }
+            }}}
             catch (Exception ex)
             {
                 result.LogMessages.Add($"[エラー] ZIPファイルの展開・処理に失敗しました ({Path.GetFileName(zipFilePath)}): {ex.Message}");

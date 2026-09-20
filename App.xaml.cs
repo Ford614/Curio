@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using Curio.Test;
-
+using System.Text;
 namespace Curio
 {
     public partial class App : Application
@@ -13,6 +13,7 @@ namespace Curio
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             if (e.Args.Contains("--test", StringComparer.OrdinalIgnoreCase))
             {
                 try
@@ -39,6 +40,7 @@ namespace Curio
             }
 
             base.OnStartup(e);
+            
         }
     }
 }

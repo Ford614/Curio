@@ -291,6 +291,21 @@ private void NavigateWebUrl(string url)
                 }
             }
         }
+        private void AutoMatchRoles_Click(object sender, RoutedEventArgs e)
+{
+    if (ScannedFiles.Count == 0)
+    {
+        MessageBox.Show(
+            "インポート一覧にカーソルファイルがありません。",
+            "カーソル検索",
+            MessageBoxButton.OK,
+            MessageBoxImage.Warning);
+
+        return;
+    }
+
+    AutoMatchRoles(ScannedFiles.ToList());
+}
 
         private void WebToastOpen_Click(object sender, RoutedEventArgs e)
         {

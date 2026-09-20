@@ -77,7 +77,7 @@
                             <TextBox Grid.Column="1" x:Name="FolderPathTextBox" VerticalAlignment="Center" Padding="6,4"/>
                             <Button Grid.Column="2" Content="参照..." Click="BrowseFolder_Click" Margin="6,0,0,0"/>
                             <CheckBox Grid.Column="3" x:Name="SubfoldersCheckBox" Content="サブフォルダも検索" IsChecked="True" VerticalAlignment="Center" Margin="12,0,0,0"/>
-                            <Button Grid.Column="4" Content="🔍 カーソル検索" Click="ScanButton_Click" Background="#2563EB" Foreground="White" FontWeight="Bold" Margin="12,0,0,0"/>
+                            <Button Grid.Column="4" Content="🔍 カーソル検索" Click="AutoMatchRoles_Click" Background="#2563EB" Foreground="White" FontWeight="Bold" Margin="12,0,0,0"/>
                         </Grid>
                     </Border>
 
