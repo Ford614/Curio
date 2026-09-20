@@ -16,6 +16,8 @@ namespace Curio.Views
 {
     public partial class MainWindow : Window
     {
+        private readonly AppSettings _settings = AppSettings.Load();
+
         public ObservableCollection<CursorFileInfo> ScannedFiles { get; } = new();
         public ObservableCollection<CursorRoleMapping> RoleMappings { get; } = new();
         public ObservableCollection<InstalledSchemeInfo> InstalledSchemes { get; } = new();
@@ -23,19 +25,22 @@ namespace Curio.Views
         private ScanResult? _currentScanResult;
         private bool _isWebViewInitialized;
 
-        public MainWindow()
-        {
-            InitializeComponent();
-            DataContext = this;
+public MainWindow()
+{
+    InitializeComponent();
+    DataContext = this;
 
-            StoragePathTextBox.Text = RegistrySchemeManager.StorageDirectory;
-            InstalledSchemesListView.ItemsSource = InstalledSchemes;
+    WebUrlTextBox.Text = _settings.DefaultUrl;
 
-            InitializeRoleMappings();
-            LoadInstalledSchemes();
+    StoragePathTextBox.Text = RegistrySchemeManager.StorageDirectory;
+    InstalledSchemesListView.ItemsSource = InstalledSchemes;
 
-            AppendLog("Curio アプリケーションを起動しました。");
-        }
+    InitializeRoleMappings();
+    LoadInstalledSchemes();
+
+    AppendLog("Curio アプリケーションを起動しました。");
+}
+
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -127,9 +132,28 @@ namespace Curio.Views
                 WebViewControl.Reload();
         }
 
+
+
+         private void WebNavSetDefault_Click(object sender, RoutedEventArgs e)
+{
+    string url = WebUrlTextBox.Text.Trim();
+
+    if (string.IsNullOrWhiteSpace(url))
+        return;
+
+
+
+    MessageBox.Show(
+        "現在のURLをデフォルトURLに設定しました。",
+        "Curio",
+        MessageBoxButton.OK,
+        MessageBoxImage.Information);
+    _settings.DefaultUrl = url;
+    _settings.Save();
+}
         private void WebNavHome_Click(object sender, RoutedEventArgs e)
         {
-            string homeUrl = "https://www.rw-designer.com/cursor-library";
+            string homeUrl = _settings.DefaultUrl;
             WebUrlTextBox.Text = homeUrl;
             NavigateWebUrl(homeUrl);
         }
@@ -147,28 +171,37 @@ namespace Curio.Views
             }
         }
 
-        private void NavigateWebUrl(string url)
-        {
-            if (!_isWebViewInitialized) return;
+private void NavigateWebUrl(string url)
+{
+    if (!_isWebViewInitialized) return;
 
-            string target = url.Trim();
-            if (string.IsNullOrWhiteSpace(target)) return;
+    string input = url.Trim();
+    if (string.IsNullOrWhiteSpace(input)) return;
 
-            if (!target.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-                !target.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            {
-                target = "https://" + target;
-            }
+    string target;
 
-            try
-            {
-                WebViewControl.Source = new Uri(target);
-            }
-            catch (Exception ex)
-            {
-                AppendLog($"[Webナビゲーションエラー] 無効なURL: {target} ({ex.Message})");
-            }
-        }
+    if (Uri.TryCreate(input, UriKind.Absolute, out Uri? uri) &&
+        (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+    {
+        // URLとして入力された場合は、そのまま開く
+        target = input;
+    }
+    else
+    {
+        // URLでなければGoogle検索
+        string query = Uri.EscapeDataString(input);
+        target = $"https://www.google.com/search?q={query}";
+    }
+
+    try
+    {
+        WebViewControl.Source = new Uri(target);
+    }
+    catch (Exception ex)
+    {
+        AppendLog($"[Webナビゲーションエラー] 無効なURL: {input} ({ex.Message})");
+    }
+}
 
         #endregion
 
@@ -268,6 +301,24 @@ namespace Curio.Views
         private void WebToastClose_Click(object sender, RoutedEventArgs e)
         {
             WebToastNotification.Visibility = Visibility.Collapsed;
+        }
+
+        private void Donate_Click(object sender, RoutedEventArgs e)
+        {
+            string donateUrl = "https://ko-fi.com/ford614";
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = donateUrl,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"[寄付リンクエラー] 寄付ページを開くことができませんでした: {ex.Message}");
+                MessageBox.Show("寄付ページを開くことができませんでした。ブラウザで直接アクセスしてください。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void RegisterAssociations_Click(object sender, RoutedEventArgs e)

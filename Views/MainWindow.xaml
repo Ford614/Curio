@@ -41,6 +41,7 @@
                     <TextBlock Text="大量の .cur / .ani / .zip ファイルを自動検出し、Windowsのマウスカーソルデザイン（スキーム）として一括登録します。" FontSize="12" Foreground="#64748B" Margin="0,2,0,0"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="❤  支援する" Click="Donate_Click" Margin="0,0,8,0" Background="#F1F5F9" ToolTip="開発者を支援できます"/>
                     <Button Content="🔗 ファイル関連付け登録" Click="RegisterAssociations_Click" Margin="0,0,8,0" Background="#F1F5F9" ToolTip="右クリックや送るメニューからCurioで直接開けるようにします"/>
                     <TextBlock Text="管理者権限不要 (HKCU)" VerticalAlignment="Center" Foreground="#059669" FontWeight="SemiBold" Background="#D1FAE5" Padding="8,4" Margin="0"/>
                 </StackPanel>
@@ -274,7 +275,16 @@
                 </Grid>
             </TabItem>
 
-            <!-- Tab 3: Web Cursor Browser -->
+            <!-- Tab 3: Cursor Creator -->
+            <TabItem Header="🎨 カーソル作成 (β)">
+                <Grid Margin="10">
+                    <TextBlock Text="カーソル作成機能は現在開発中です。今後のアップデートで追加予定です。" FontSize="14" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+
+            </TabItem>
+
+
+            <!-- Tab 4: Web Cursor Browser -->
             <TabItem Header="🌐 Webでカーソルを探す">
                 <Grid Margin="6">
                     <Grid.RowDefinitions>
@@ -290,6 +300,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
@@ -298,9 +309,9 @@
                             <Button Grid.Column="1" Content="▶" Click="WebNavForward_Click" ToolTip="進む" Width="32"/>
                             <Button Grid.Column="2" Content="↻" Click="WebNavRefresh_Click" ToolTip="再読み込み" Width="32"/>
                             <Button Grid.Column="3" Content="🏠" Click="WebNavHome_Click" ToolTip="カーソル配布サイトを開く" Width="32"/>
-
-                            <TextBox Grid.Column="4" x:Name="WebUrlTextBox" VerticalAlignment="Center" Padding="6,4" Margin="6,0" KeyDown="WebUrlTextBox_KeyDown" Text="https://www.rw-designer.com/cursor-library"/>
-                            <Button Grid.Column="5" Content="移動" Click="WebNavGo_Click" Background="#2563EB" Foreground="White" FontWeight="Bold"/>
+                            <Button Grid.Column="4" Content="🔗" Click="WebNavSetDefault_Click" ToolTip="デフォルトリンクを変更" Width="32"/>
+                            <TextBox Grid.Column="5" x:Name="WebUrlTextBox" VerticalAlignment="Center" Padding="6,4" Margin="6,0" KeyDown="WebUrlTextBox_KeyDown"/>
+                            <Button Grid.Column="6" Content="移動" Click="WebNavGo_Click" Background="#2563EB" Foreground="White" FontWeight="Bold"/>
                         </Grid>
                     </Border>
 
@@ -328,7 +339,12 @@
                     </Grid>
                 </Grid>
             </TabItem>
-
+            <!-- Tab 5: Settings -->
+            <TabItem Header="⚙️ 設定">
+                <Grid Margin="10">
+                    <TextBlock Text="アプリの設定を管理できます。" FontSize="14" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+            </TabItem>
         </TabControl>
 
         <GridSplitter Grid.Row="2" Height="4" HorizontalAlignment="Stretch" Background="#CBD5E1"/>
