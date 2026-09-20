@@ -40,29 +40,6 @@
 
 ---
 
-## ビルド方法
-
-### コマンドラインでのビルド
-
-1. **プロジェクトフォルダへ移動**
-   ```powershell
-   cd s:\Work\Program\Projects\App\Curio
-   ```
-
-2. **リリースビルドの実行**
-   ```powershell
-   dotnet build -c Release
-   ```
-   ビルド成果物は `bin\Release\net10.0-windows\Curio.exe` に出力されます。
-
-3. **単一 EXE ファイルとしてのパブリッシュ (配布用)**
-   ```powershell
-   dotnet publish -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true
-   ```
-   `bin\Release\net10.0-windows\win-x64\publish\Curio.exe` に単一実行ファイルが生成されます。
-
----
-
 ## 使い方
 
 ### 1. カーソルの一括登録
@@ -88,3 +65,20 @@
   `HKEY_CURRENT_USER\Control Panel\Cursors\Schemes`
 - **デフォルト保存先**:  
   `%LOCALAPPDATA%\Curio\Schemes\<スキーム名>\` （画面上から自由に変更可能）
+
+## License
+
+Curio is source-available software.
+
+You may:
+- View the source code
+- Fork the repository
+- Modify it for personal use
+- Submit issues and pull requests
+
+You may not:
+- Redistribute Curio or modified versions
+- Sell Curio or modified versions
+- Use the Curio name or branding for unofficial versions
+
+See LICENSE for the complete terms.
