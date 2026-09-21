@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,13 +12,15 @@ using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 using Curio.Models;
 using Curio.Services;
-using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Curio.Views
+
 {
     public partial class MainWindow : Window
     {
-        private readonly AppSettings _settings = AppSettings.Load();
+        private readonly AppSettings _settings = App.Settings ?? AppSettings.Load();
+        private bool _isInitializingControls = true;
 
         public ObservableCollection<CursorFileInfo> ScannedFiles { get; } = new();
         public ObservableCollection<CursorRoleMapping> RoleMappings { get; } = new();
@@ -26,25 +29,73 @@ namespace Curio.Views
         private ScanResult? _currentScanResult;
         private bool _isWebViewInitialized;
 
-public MainWindow()
-{
-    InitializeComponent();
-    DataContext = this;
+        public MainWindow()
+        {
+            InitializeComponent();
+            DataContext = this;
 
-    WebUrlTextBox.Text = _settings.DefaultUrl;
-    SettingsDefaultUrlTextBox.Text = _settings.DefaultUrl;
-    StoragePathTextBox.Text = RegistrySchemeManager.StorageDirectory;
-    InstalledSchemesListView.ItemsSource = InstalledSchemes;
+            WebUrlTextBox.Text = _settings.DefaultUrl;
+            SettingsDefaultUrlTextBox.Text = _settings.DefaultUrl;
+            StoragePathTextBox.Text = RegistrySchemeManager.StorageDirectory;
+            InstalledSchemesListView.ItemsSource = InstalledSchemes;
 
-    InitializeRoleMappings();
-    LoadInstalledSchemes();
+            InitializeSettingsControls();
 
-    AppendLog("Curio アプリケーションを起動しました。");
-}
+            InitializeRoleMappings();
+            LoadInstalledSchemes();
 
+            _isInitializingControls = false;
+
+            AppendLog("Curio アプリケーションを起動しました。");
+        }
+
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(
+            IntPtr hwnd,
+            int dwAttribute,
+            ref int pvAttribute,
+            int cbAttribute);
+
+        private void SetTitleBarDarkMode(bool enabled)
+        {
+            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+
+            int useDarkMode = enabled ? 1 : 0;
+
+            DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_USE_IMMERSIVE_DARK_MODE,
+                ref useDarkMode,
+                sizeof(int));
+        }
+
+        private void InitializeSettingsControls()
+        {
+            // Set initial Theme selection
+            if (string.Equals(_settings.Theme, "Light", StringComparison.OrdinalIgnoreCase))
+                ThemeComboBox.SelectedIndex = 1;
+            else if (string.Equals(_settings.Theme, "Dark", StringComparison.OrdinalIgnoreCase))
+                ThemeComboBox.SelectedIndex = 2;
+            else
+                ThemeComboBox.SelectedIndex = 0; // System
+
+            // Set initial UIStyle selection
+            if (string.Equals(_settings.UIStyle, "XP", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(_settings.UIStyle, "Windows XP風", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(_settings.UIStyle, "OLD", StringComparison.OrdinalIgnoreCase))
+                UIStyleComboBox.SelectedIndex = 1; // XP
+            else
+                UIStyleComboBox.SelectedIndex = 0; // Modern
+
+            UpdateTitleBarTheme();
+        }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            UpdateTitleBarTheme();
+
             await InitializeWebViewAsync();
 
             // Process startup file arguments (Open With, Drag & Drop to EXE, Command Line)
@@ -133,30 +184,30 @@ public MainWindow()
                 WebViewControl.Reload();
         }
 
-
-
-         private void WebNavSetDefault_Click(object sender, RoutedEventArgs e)
-{
-    string url = WebUrlTextBox.Text.Trim();
-
-    if (string.IsNullOrWhiteSpace(url))
-        return;
-
-
-
-    MessageBox.Show(
-        "現在のURLをデフォルトURLに設定しました。",
-        "Curio",
-        MessageBoxButton.OK,
-        MessageBoxImage.Information);
-    _settings.DefaultUrl = url;
-    _settings.Save();
-}
         private void WebNavHome_Click(object sender, RoutedEventArgs e)
         {
-            string homeUrl = _settings.DefaultUrl;
-            WebUrlTextBox.Text = homeUrl;
-            NavigateWebUrl(homeUrl);
+            string url = _settings.DefaultUrl;
+            WebUrlTextBox.Text = url;
+            NavigateWebUrl(url);
+        }
+
+        private void WebNavSetDefault_Click(object sender, RoutedEventArgs e)
+        {
+            string currentUrl = WebUrlTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(currentUrl)) return;
+
+            _settings.DefaultUrl = currentUrl;
+            _settings.Save();
+
+            SettingsDefaultUrlTextBox.Text = currentUrl;
+
+            MessageBox.Show(
+                $"デフォルトURLを以下に変更しました:\n{currentUrl}",
+                "設定保存",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+
+            AppendLog($"[設定] デフォルトURLを変更: {currentUrl}");
         }
 
         private void WebNavGo_Click(object sender, RoutedEventArgs e)
@@ -172,37 +223,28 @@ public MainWindow()
             }
         }
 
-private void NavigateWebUrl(string url)
-{
-    if (!_isWebViewInitialized) return;
+        private void NavigateWebUrl(string url)
+        {
+            if (!_isWebViewInitialized) return;
 
-    string input = url.Trim();
-    if (string.IsNullOrWhiteSpace(input)) return;
+            string target = url.Trim();
+            if (string.IsNullOrWhiteSpace(target)) return;
 
-    string target;
+            if (!target.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                !target.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                target = "https://" + target;
+            }
 
-    if (Uri.TryCreate(input, UriKind.Absolute, out Uri? uri) &&
-        (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
-    {
-        // URLとして入力された場合は、そのまま開く
-        target = input;
-    }
-    else
-    {
-        // URLでなければGoogle検索
-        string query = Uri.EscapeDataString(input);
-        target = $"https://www.google.com/search?q={query}";
-    }
-
-    try
-    {
-        WebViewControl.Source = new Uri(target);
-    }
-    catch (Exception ex)
-    {
-        AppendLog($"[Webナビゲーションエラー] 無効なURL: {input} ({ex.Message})");
-    }
-}
+            try
+            {
+                WebViewControl.Source = new Uri(target);
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"[Webナビゲーションエラー] 無効なURL: {target} ({ex.Message})");
+            }
+        }
 
         #endregion
 
@@ -257,7 +299,6 @@ private void NavigateWebUrl(string url)
 
             if (result.ImportedFiles.Count > 0)
             {
-                // Add newly imported items into ScannedFiles collection
                 foreach (var item in result.ImportedFiles)
                 {
                     if (!ScannedFiles.Any(f => f.FilePath.Equals(item.FilePath, StringComparison.OrdinalIgnoreCase)))
@@ -269,7 +310,6 @@ private void NavigateWebUrl(string url)
                 DetectedFilesListBox.ItemsSource = ScannedFiles;
                 ScanSummaryTextBlock.Text = $"インポート検出: 全 {ScannedFiles.Count} 件のファイル";
 
-                // Auto-match roles
                 AutoMatchRoles(ScannedFiles.ToList());
 
                 if (isWebDownload)
@@ -279,8 +319,7 @@ private void NavigateWebUrl(string url)
                 }
                 else
                 {
-                    // Switch to Batch Installer Tab
-                    MainTabControl.SelectedIndex = 1;
+                    MainTabControl.SelectedIndex = 0; // Batch Installer tab
                     MessageBox.Show($"カーソルファイルを {result.ImportedFiles.Count} 個取り込みました！\n役割の割り当てを確認して一括インストールしてください。", "取り込み完了", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -292,49 +331,16 @@ private void NavigateWebUrl(string url)
                 }
             }
         }
-        private void AutoMatchRoles_Click(object sender, RoutedEventArgs e)
-{
-    if (ScannedFiles.Count == 0)
-    {
-        MessageBox.Show(
-            "インポート一覧にカーソルファイルがありません。",
-            "カーソル検索",
-            MessageBoxButton.OK,
-            MessageBoxImage.Warning);
-
-        return;
-    }
-
-    AutoMatchRoles(ScannedFiles.ToList());
-}
 
         private void WebToastOpen_Click(object sender, RoutedEventArgs e)
         {
             WebToastNotification.Visibility = Visibility.Collapsed;
-            MainTabControl.SelectedIndex = 1; // Switch to Batch Installer tab
+            MainTabControl.SelectedIndex = 0; // Switch to Batch Installer tab
         }
 
         private void WebToastClose_Click(object sender, RoutedEventArgs e)
         {
             WebToastNotification.Visibility = Visibility.Collapsed;
-        }
-
-        private void Donate_Click(object sender, RoutedEventArgs e)
-        {
-            string donateUrl = "https://ko-fi.com/ford614";
-            try
-            {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = donateUrl,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                AppendLog($"[寄付リンクエラー] 寄付ページを開くことができませんでした: {ex.Message}");
-                MessageBox.Show("寄付ページを開くことができませんでした。ブラウザで直接アクセスしてください。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         private void RegisterAssociations_Click(object sender, RoutedEventArgs e)
@@ -355,21 +361,121 @@ private void NavigateWebUrl(string url)
 
         #endregion
 
+        #region Settings Event Handlers
+
+        private void SettingsSaveDefaultUrl_Click(object sender, RoutedEventArgs e)
+        {
+            string url = SettingsDefaultUrlTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(url)) return;
+
+            _settings.DefaultUrl = url;
+            _settings.Save();
+
+            WebUrlTextBox.Text = url;
+
+            MessageBox.Show(
+                $"デフォルトURLを以下に変更しました:\n{url}",
+                "設定保存",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+
+            AppendLog($"[設定] デフォルトURLを変更: {url}");
+        }
+
+        private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isInitializingControls) return;
+
+            string selectedTheme = ThemeComboBox.SelectedIndex switch
+            {
+                1 => "Light",
+                2 => "Dark",
+                _ => "System"
+            };
+
+            _settings.Theme = selectedTheme;
+            _settings.Save();
+
+            StyleManager.Apply(_settings.UIStyle, _settings.Theme);
+            UpdateTitleBarTheme();
+            AppendLog($"[設定] テーマを変更: {selectedTheme}");
+        }
+
+        private bool IsWindowsDarkMode()
+        {
+            using RegistryKey? key = Registry.CurrentUser.OpenSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+
+            object? value = key?.GetValue("AppsUseLightTheme");
+
+            return value is int intValue && intValue == 0;
+        }
+        private void UpdateTitleBarTheme()
+        {
+            bool isDark = string.Equals(
+                _settings.Theme,
+                "Dark",
+                StringComparison.OrdinalIgnoreCase);
+
+            if (string.Equals(_settings.Theme, "System", StringComparison.OrdinalIgnoreCase))
+            {
+                isDark = IsWindowsDarkMode();
+            }
+
+            SetTitleBarDarkMode(isDark);
+        }
+        private void UIStyleComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isInitializingControls) return;
+
+            string selectedStyle = UIStyleComboBox.SelectedIndex switch
+            {
+                1 => "XP",
+                _ => "Modern"
+            };
+
+            _settings.UIStyle = selectedStyle;
+            _settings.Save();
+
+            StyleManager.Apply(_settings.UIStyle, _settings.Theme);
+            UpdateTitleBarTheme();
+            AppendLog($"[設定] UIスタイルを変更: {selectedStyle}");
+        }
+
+        private void Donate_Click(object sender, RoutedEventArgs e)
+        {
+            OpenBrowser("https://github.com/sponsors");
+        }
+
+        private void SupportEmail_Click(object sender, RoutedEventArgs e)
+        {
+            OpenBrowser("https://github.com/issues");
+        }
+
+        private void GitHub_Click(object sender, RoutedEventArgs e)
+        {
+            OpenBrowser("https://github.com");
+        }
+
+        private static void OpenBrowser(string url)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch
+            {
+            }
+        }
+
+        #endregion
+
         #region Original Batch Installer & Scheme Management Logic
 
-private void ClearDetectedFiles_Click(object sender, RoutedEventArgs e)
-{
-    ScannedFiles.Clear();
-
-    foreach (var mapping in RoleMappings)
-    {
-        mapping.SelectedFile = null;
-    }
-
-    ScanSummaryTextBlock.Text = "フォルダ選択またはドラッグ＆ドロップしてください";
-
-    AppendLog("[インポート一覧] 検出されたファイルをクリアしました。");
-}
         private void InitializeRoleMappings()
         {
             RoleMappings.Clear();
@@ -493,6 +599,26 @@ private void ClearDetectedFiles_Click(object sender, RoutedEventArgs e)
             AutoMatchRoles(ScannedFiles.ToList());
         }
 
+        private void AutoMatchRoles_Click(object sender, RoutedEventArgs e)
+        {
+            string folderPath = FolderPathTextBox.Text.Trim();
+
+            if (!string.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
+            {
+                ExecuteScan(folderPath);
+                return;
+            }
+
+            if (ScannedFiles.Count > 0)
+            {
+                AutoMatchRoles(ScannedFiles.ToList());
+                AppendLog($"[自動割り当て] 既に読み込まれている {ScannedFiles.Count} 件のファイルから再割り当てを行いました。");
+                return;
+            }
+
+            MessageBox.Show("フォルダパスを入力して「参照...」で選択するか、ファイルをドラッグ＆ドロップしてください。", "案内", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
         private void AutoMatchRoles(List<CursorFileInfo> filesToMatch)
         {
             var matchedList = CursorMatcher.MatchRoles(filesToMatch);
@@ -612,7 +738,7 @@ private void ClearDetectedFiles_Click(object sender, RoutedEventArgs e)
 
         private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.Source == MainTabControl && MainTabControl.SelectedIndex == 2)
+            if (e.Source == MainTabControl && MainTabControl.SelectedIndex == 1)
             {
                 LoadInstalledSchemes();
             }
@@ -699,62 +825,7 @@ private void ClearDetectedFiles_Click(object sender, RoutedEventArgs e)
             LogTextBox.AppendText($"[{timeStamp}] {message}\n");
             LogTextBox.ScrollToEnd();
         }
+
         #endregion
-         #region Settings Tab Handlers
-
-private void SettingsSaveDefaultUrl_Click(object sender, RoutedEventArgs e)
-{
-    string url = SettingsDefaultUrlTextBox.Text.Trim();
-
-    if (string.IsNullOrWhiteSpace(url))
-    {
-        MessageBox.Show(
-            "URLを入力してください。",
-            "設定",
-            MessageBoxButton.OK,
-            MessageBoxImage.Warning);
-
-        return;
-    }
-
-    _settings.DefaultUrl = url;
-    _settings.Save();
-
-    WebUrlTextBox.Text = url;
-
-    MessageBox.Show(
-        "デフォルトURLを保存しました。",
-        "設定",
-        MessageBoxButton.OK,
-        MessageBoxImage.Information);
-}
-private void SupportEmail_Click(object sender, RoutedEventArgs e)
-{
-    try
-    {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "ford614.dev@gmail.com",
-            UseShellExecute = true
-        });
-    }
-    catch (Exception ex)
-    {
-        MessageBox.Show(
-            $"メールアプリを開けませんでした。\n{ex.Message}",
-            "サポート",
-            MessageBoxButton.OK,
-            MessageBoxImage.Warning);
-    }
-}
-private void GitHub_Click(object sender, RoutedEventArgs e)
-{
-    Process.Start(new ProcessStartInfo
-    {
-        FileName = "https://github.com/Ford614/Curio",
-        UseShellExecute = true
-    });
-}
-              #endregion
     }
 }

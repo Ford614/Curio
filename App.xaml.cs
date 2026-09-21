@@ -3,17 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using Curio.Services;
 using Curio.Test;
-using System.Text;
+
 namespace Curio
 {
     public partial class App : Application
     {
         public static List<string> StartupFilePaths { get; } = new();
+        public static AppSettings Settings { get; private set; } = new();
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            // Load saved settings
+            Settings = AppSettings.Load();
+
+            // Apply saved UI style and Theme on startup
+            StyleManager.Apply(Settings.UIStyle, Settings.Theme);
+
             if (e.Args.Contains("--test", StringComparer.OrdinalIgnoreCase))
             {
                 try
@@ -40,7 +47,6 @@ namespace Curio
             }
 
             base.OnStartup(e);
-            
         }
     }
 }

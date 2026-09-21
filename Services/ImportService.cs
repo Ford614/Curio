@@ -3,11 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using Curio.Models;
 using System.Text;
+using Curio.Models;
 
 namespace Curio.Services
 {
+    public class ImportResult
+    {
+        public List<CursorFileInfo> ImportedFiles { get; } = new();
+        public List<string> LogMessages { get; } = new();
+        public int SkippedExecutablesCount { get; set; }
+        public int ErrorCount { get; set; }
+
+        public int TotalDetectedCount => ImportedFiles.Count;
+    }
+
     public static class ImportService
     {
         public const long MaxSingleFileSizeBytes = 50 * 1024 * 1024; // 50 MB
@@ -29,6 +39,17 @@ namespace Curio.Services
         {
             ".cur", ".ani", ".inf"
         };
+
+        static ImportService()
+        {
+            try
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            }
+            catch
+            {
+            }
+        }
 
         public static string GetDownloadsDirectory()
         {
@@ -178,12 +199,7 @@ namespace Curio.Services
 
                 long totalExtractedBytes = 0;
 
-using (var archive = ZipFile.Open(
-    zipFilePath,
-    ZipArchiveMode.Read,
-    Encoding.GetEncoding(932)))
-{
-{
+                using (var archive = ZipFile.OpenRead(zipFilePath))
                 {
                     foreach (var entry in archive.Entries)
                     {
@@ -244,7 +260,7 @@ using (var archive = ZipFile.Open(
                 }
 
                 result.LogMessages.Add($"[完了] ZIPの展開が完了しました: {Path.GetFileName(zipFilePath)}");
-            }}}
+            }
             catch (Exception ex)
             {
                 result.LogMessages.Add($"[エラー] ZIPファイルの展開・処理に失敗しました ({Path.GetFileName(zipFilePath)}): {ex.Message}");
