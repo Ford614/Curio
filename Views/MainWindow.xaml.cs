@@ -12,6 +12,7 @@ using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 using Curio.Models;
 using Curio.Services;
+using Curio.Views.PaintEditor;
 using System.Runtime.InteropServices;
 
 namespace Curio.Views
@@ -28,6 +29,7 @@ namespace Curio.Views
 
         private ScanResult? _currentScanResult;
         private bool _isWebViewInitialized;
+        private PaintEditorView? _paintEditorView;
 
         public MainWindow()
         {
@@ -288,6 +290,12 @@ namespace Curio.Views
 
         #region Unified Import Pipeline
 
+        private void ClearDetectedFilesButton_Click(object sender, RoutedEventArgs e)
+{
+    ScannedFiles.Clear();
+    ScanSummaryTextBlock.Text = "フォルダ選択またはドラッグ＆ドロップしてください";
+}
+
         private void ProcessIncomingFiles(IEnumerable<string> paths, bool isWebDownload)
         {
             var result = ImportService.ProcessImport(paths);
@@ -357,6 +365,136 @@ namespace Curio.Views
             {
                 MessageBox.Show("ファイル関連付けの登録に失敗しました。ログパネルをご確認ください。", "登録失敗", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        #endregion
+
+        #region Paint Editor
+
+        private void CreatePaintEditor_Click(object sender, RoutedEventArgs e)
+        {
+            ShowPaintEditor(new PaintEditorView(), "新しいカーソル作成画面を開きました。");
+        }
+
+        private void OpenPaintEditor_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "カーソルファイル (*.cur;*.ani)|*.cur;*.ani",
+                Title = "編集するCUR/ANIファイルを開く"
+            };
+
+            if (dialog.ShowDialog(this) != true) return;
+
+            try
+            {
+                ShowPaintEditor(
+                    CreatePaintEditorForFile(dialog.FileName),
+                    $"カーソルを開きました: {Path.GetFileName(dialog.FileName)}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    this,
+                    $"カーソルファイルを開けませんでした。\n{ex.Message}",
+                    "カーソル読み込みエラー",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void EditSelectedPaintEditor_Click(object sender, RoutedEventArgs e)
+        {
+            if (DetectedFilesListBox.SelectedItem is not CursorFileInfo selectedFile)
+            {
+                MessageBox.Show(this, "一括登録タブの検出ファイル一覧からCURを選択してください。", "CUR編集", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if ((!string.Equals(selectedFile.Extension, ".cur", StringComparison.OrdinalIgnoreCase) &&
+                 !string.Equals(selectedFile.Extension, ".ani", StringComparison.OrdinalIgnoreCase)) ||
+                !File.Exists(selectedFile.FilePath))
+            {
+                MessageBox.Show(this, "選択されたファイルは編集可能なCUR/ANIファイルではありません。", "カーソル編集", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                ShowPaintEditor(
+                    CreatePaintEditorForFile(selectedFile.FilePath),
+                    $"選択中のカーソルを開きました: {selectedFile.FileName}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"カーソルファイルを開けませんでした。\n{ex.Message}", "カーソル読み込みエラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private static PaintEditorView CreatePaintEditorForFile(string filePath)
+        {
+            if (string.Equals(Path.GetExtension(filePath), ".ani", StringComparison.OrdinalIgnoreCase))
+            {
+                AniCursorData animation = AniCursorReader.Read(filePath);
+                return new PaintEditorView(animation.Frames, animation.FrameDelaysMs, filePath);
+            }
+
+            return new PaintEditorView(CursorCanvasService.Read(filePath), filePath);
+        }
+
+        private void ShowPaintEditor(PaintEditorView editor, string logMessage)
+        {
+            if (_paintEditorView != null)
+                HidePaintEditor();
+
+            _paintEditorView = editor;
+            _paintEditorView.BackRequested += PaintEditorView_BackRequested;
+            _paintEditorView.Saved += PaintEditorView_Saved;
+            PaintEditorHost.Content = _paintEditorView;
+
+            MainTabControl.Visibility = Visibility.Collapsed;
+            PaintEditorHost.Visibility = Visibility.Visible;
+            LogRowDefinition.Height = new GridLength(0);
+            MainSplitter.Visibility = Visibility.Collapsed;
+            AppendLog($"[カーソル作成] {logMessage}");
+        }
+
+        private void PaintEditorView_Saved(object? sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(_paintEditorView?.SavedFilePath))
+            {
+                AppendLog($"[カーソル作成] {_paintEditorView.SavedFilePath}");
+                AppendLog("[カーソル作成] カーソルファイルを保存しました。");
+
+                CursorFileInfo? editedFile = ScannedFiles.FirstOrDefault(file =>
+                    string.Equals(file.FilePath, _paintEditorView.SavedFilePath, StringComparison.OrdinalIgnoreCase));
+                if (editedFile != null)
+                {
+                    editedFile.Preview = CursorPreviewRenderer.CreatePreview(editedFile.FilePath);
+                    DetectedFilesListBox.Items.Refresh();
+                }
+            }
+        }
+
+        private void PaintEditorView_BackRequested(object? sender, EventArgs e)
+        {
+            HidePaintEditor();
+        }
+
+        private void HidePaintEditor()
+        {
+            if (_paintEditorView != null)
+            {
+                _paintEditorView.BackRequested -= PaintEditorView_BackRequested;
+                _paintEditorView.Saved -= PaintEditorView_Saved;
+            }
+
+            PaintEditorHost.Content = null;
+            _paintEditorView = null;
+            PaintEditorHost.Visibility = Visibility.Collapsed;
+            MainTabControl.Visibility = Visibility.Visible;
+            LogRowDefinition.Height = new GridLength(170);
+            MainSplitter.Visibility = Visibility.Visible;
         }
 
         #endregion
@@ -444,7 +582,7 @@ namespace Curio.Views
 
         private void Donate_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://github.com/sponsors");
+            OpenBrowser("https://ko-fi.com/ford614");
         }
 
         private void SupportEmail_Click(object sender, RoutedEventArgs e)

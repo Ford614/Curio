@@ -28,6 +28,9 @@
     <SolidColorBrush x:Key="DividerBrush" Color="#CBD5E1"/>
     <SolidColorBrush x:Key="PreviewBackgroundBrush" Color="#F8FAFC"/>
     <SolidColorBrush x:Key="PreviewBorderBrush" Color="#CBD5E1"/>
+    <SolidColorBrush x:Key="EditorCanvasBackgroundBrush" Color="#E2E8F0"/>
+    <SolidColorBrush x:Key="EditorGridBrush" Color="#64748B"/>
+    <SolidColorBrush x:Key="EditorSelectionBrush" Color="#2563EB"/>
     <SolidColorBrush x:Key="StatusBackgroundBrush" Color="#D1FAE5"/>
     <SolidColorBrush x:Key="StatusForegroundBrush" Color="#166534"/>
     <SolidColorBrush x:Key="StatusBorderBrush" Color="#86EFAC"/>

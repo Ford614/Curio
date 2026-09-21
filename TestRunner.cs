@@ -42,6 +42,8 @@ namespace Curio.Test
                     throw new Exception($"Expected 4 files, got {scanResult.AllFiles.Count}");
                 }
 
+                TestAniRoundTrip(tempDir);
+
                 // 3. Test Matcher
                 var mappings = CursorMatcher.MatchRoles(scanResult.AllFiles);
                 int assignedCount = mappings.Count(m => m.IsAssigned);
@@ -230,6 +232,42 @@ namespace Curio.Test
 
             ImportService.CleanTempExtracts();
             Console.WriteLine("  - Security checks and Zip extraction PASSED!");
+        }
+
+        private static void TestAniRoundTrip(string tempDir)
+        {
+            string aniPath = Path.Combine(tempDir, "roundtrip.ani");
+            byte[] firstPixels = new byte[32 * 32 * 4];
+            byte[] secondPixels = new byte[32 * 32 * 4];
+            int firstPixel = (3 * 32 + 4) * 4;
+            int secondPixel = (10 * 32 + 12) * 4;
+            firstPixels[firstPixel] = 0x10;
+            firstPixels[firstPixel + 1] = 0x20;
+            firstPixels[firstPixel + 2] = 0x30;
+            firstPixels[firstPixel + 3] = 0xFF;
+            secondPixels[secondPixel] = 0x40;
+            secondPixels[secondPixel + 1] = 0x50;
+            secondPixels[secondPixel + 2] = 0x60;
+            secondPixels[secondPixel + 3] = 0xFF;
+
+            var frames = new[]
+            {
+                new CursorCanvasImage(32, 32, 5, 6, firstPixels),
+                new CursorCanvasImage(32, 32, 5, 6, secondPixels)
+            };
+            AniCursorWriter.Write(aniPath, frames, new[] { 100, 250 });
+
+            AniCursorData result = AniCursorReader.Read(aniPath);
+            if (result.Frames.Count != 2 || result.FrameDelaysMs.Count != 2)
+                throw new Exception("ANI round-trip frame count failed!");
+            if (result.FrameDelaysMs[0] != 100 || result.FrameDelaysMs[1] != 250)
+                throw new Exception("ANI round-trip frame duration failed!");
+            if (result.Frames[0].HotspotX != 5 || result.Frames[0].HotspotY != 6)
+                throw new Exception("ANI round-trip hotspot failed!");
+            if (result.Frames[0].Bgra[firstPixel + 3] != 0xFF || result.Frames[1].Bgra[secondPixel + 3] != 0xFF)
+                throw new Exception("ANI round-trip pixel data failed!");
+
+            Console.WriteLine("[1.5] ANI read/write round-trip PASSED!");
         }
 
         private static byte[] CreateDummyCursorBytes()

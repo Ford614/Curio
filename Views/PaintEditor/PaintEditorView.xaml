@@ -1,0 +1,356 @@
+<UserControl x:Class="Curio.Views.PaintEditor.PaintEditorView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        UseLayoutRounding="True"
+        PreviewKeyDown="Window_PreviewKeyDown">
+    <UserControl.Resources>
+        <Style TargetType="Button" BasedOn="{StaticResource AppButtonStyle}"/>
+    </UserControl.Resources>
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource CardCornerRadius}"
+                Padding="10"
+                Margin="0,0,0,12">
+            <WrapPanel VerticalAlignment="Center">
+                <Button Content="新規32×32"
+                        Click="New_Click"
+                        Margin="0,0,6,0"/>
+                <Button Content="開く"
+                        Click="Open_Click"
+                        Margin="0,0,6,0"/>
+                <Button x:Name="SaveButton"
+                        Content="保存"
+                        Click="Save_Click"
+                        Background="{DynamicResource PrimaryAccentBrush}"
+                        Foreground="{DynamicResource PrimaryAccentForegroundBrush}"
+                        Margin="0,0,16,0"/>
+                <Button Content="戻る"
+                        Click="Back_Click"
+                        Margin="0,0,16,0"/>
+
+                <TextBlock Text="ツール"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="0,0,6,0"/>
+                <Button x:Name="PencilButton"
+                        Content="✎ ペン"
+                        Click="Pencil_Click"
+                        Margin="0,0,4,0"/>
+                <Button x:Name="EraserButton"
+                        Content="消しゴム"
+                        Click="Eraser_Click"
+                        Margin="0,0,4,0"/>
+                <Button x:Name="EyedropperButton"
+                        Content="スポイト"
+                        Click="Eyedropper_Click"
+                        Margin="0,0,4,0"/>
+                <Button x:Name="FillButton"
+                        Content="塗りつぶし"
+                        Click="Fill_Click"
+                        Margin="0,0,4,0"/>
+                <Button x:Name="SelectButton"
+                        Content="選択"
+                        Click="Select_Click"
+                        Margin="0,0,16,0"/>
+
+                <TextBlock Text="ブラシ"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="0,0,6,0"/>
+                <ComboBox x:Name="BrushSizeComboBox"
+                          Width="80"
+                          SelectionChanged="BrushSizeComboBox_SelectionChanged"
+                          Margin="0,0,16,0">
+                    <ComboBoxItem Content="1 px" Tag="1"/>
+                    <ComboBoxItem Content="2 px" Tag="2"/>
+                    <ComboBoxItem Content="3 px" Tag="3"/>
+                    <ComboBoxItem Content="4 px" Tag="4"/>
+                    <ComboBoxItem Content="6 px" Tag="6"/>
+                </ComboBox>
+
+                <Button Content="元に戻す"
+                        Click="Undo_Click"
+                        x:Name="UndoButton"
+                        Margin="0,0,4,0"/>
+                <Button Content="やり直す"
+                        Click="Redo_Click"
+                        x:Name="RedoButton"/>
+                <Button Content="左右反転"
+                        Click="FlipHorizontal_Click"
+                        Margin="8,0,4,0"/>
+                <Button Content="上下反転"
+                        Click="FlipVertical_Click"
+                        Margin="0,0,4,0"/>
+                <Button Content="コピー"
+                        Click="CopySelection_Click"
+                        Margin="0,0,4,0"/>
+                <Button Content="貼り付け"
+                        Click="PasteSelection_Click"
+                        Margin="0,0,4,0"/>
+                <Button Content="選択範囲を削除"
+                        Click="DeleteSelection_Click"
+                        Margin="0,0,4,0"/>
+                <ComboBox x:Name="CanvasSizeComboBox"
+                          Width="86"
+                          ToolTip="キャンバスサイズ"
+                          Margin="8,0,4,0">
+                    <ComboBoxItem Content="16×16" Tag="16"/>
+                    <ComboBoxItem Content="24×24" Tag="24"/>
+                    <ComboBoxItem Content="32×32" Tag="32"/>
+                    <ComboBoxItem Content="48×48" Tag="48"/>
+                    <ComboBoxItem Content="64×64" Tag="64"/>
+                    <ComboBoxItem Content="96×96" Tag="96"/>
+                    <ComboBoxItem Content="128×128" Tag="128"/>
+                    <ComboBoxItem Content="256×256" Tag="256"/>
+                </ComboBox>
+                <Button Content="サイズ変更"
+                        Click="ResizeCanvas_Click"
+                        Margin="0,0,8,0"/>
+                <CheckBox x:Name="GridCheckBox"
+                          Content="グリッド"
+                          IsChecked="True"
+                          VerticalAlignment="Center"
+                          Foreground="{DynamicResource TextPrimaryBrush}"
+                          Checked="GridCheckBox_Changed"
+                          Unchecked="GridCheckBox_Changed"
+                          Margin="12,0,0,0"/>
+            </WrapPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+            <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="250"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="{DynamicResource CardCornerRadius}"
+                    Padding="12">
+                <Canvas x:Name="PixelCanvas"
+                        Width="512"
+                        Height="512"
+                        Background="{DynamicResource EditorCanvasBackgroundBrush}"
+                        MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"
+                        MouseMove="PixelCanvas_MouseMove"
+                        MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp">
+                    <Image x:Name="CanvasImage"
+                           Width="512"
+                           Height="512"
+                           Stretch="Fill"
+                           IsHitTestVisible="False"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Canvas x:Name="GridOverlay"
+                            Width="512"
+                            Height="512"
+                            IsHitTestVisible="False"/>
+                    <Canvas x:Name="SelectionOverlay"
+                            Width="512"
+                            Height="512"
+                            IsHitTestVisible="False"/>
+                    <Line x:Name="HotspotVerticalLine"
+                          Stroke="#FFE05252"
+                          StrokeThickness="1"
+                          IsHitTestVisible="False"/>
+                    <Line x:Name="HotspotHorizontalLine"
+                          Stroke="#FFE05252"
+                          StrokeThickness="1"
+                          IsHitTestVisible="False"/>
+                    <Ellipse x:Name="HotspotMarker"
+                             Width="9"
+                             Height="9"
+                             Stroke="#FFFFFFFF"
+                             Fill="#FFE05252"
+                             StrokeThickness="1"
+                             IsHitTestVisible="False"/>
+                </Canvas>
+            </Border>
+
+            <ScrollViewer Grid.Column="1"
+                          VerticalScrollBarVisibility="Auto"
+                          Margin="14,0,0,0">
+                <StackPanel>
+                    <Border Background="{DynamicResource CardBackgroundBrush}"
+                            BorderBrush="{DynamicResource CardBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource CardCornerRadius}"
+                            Padding="12"
+                            Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="色"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+                                <Border x:Name="ColorPreview"
+                                        Width="34"
+                                        Height="34"
+                                        Background="#FFFFFFFF"
+                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Margin="0,0,8,0"/>
+                                <TextBox x:Name="HexColorTextBox"
+                                         Width="92"
+                                         VerticalContentAlignment="Center"
+                                         Text="#FFFFFF"
+                                         ToolTip="#RRGGBB または #AARRGGBB"/>
+                                <Button Content="適用"
+                                        Click="ApplyHexColor_Click"
+                                        Margin="6,0,0,0"/>
+                            </StackPanel>
+                            <WrapPanel>
+                                <Button Width="26" Height="26" Padding="0" Background="#FF000000" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#FFFFFFFF" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#FFE05252" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#FFF59E0B" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#FF22C55E" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#FF3B82F6" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#FFA855F7" Click="ColorSwatch_Click"/>
+                            </WrapPanel>
+                            <TextBlock Text="不透明度"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Margin="0,12,0,2"/>
+                            <Slider x:Name="AlphaSlider"
+                                    Minimum="0"
+                                    Maximum="255"
+                                    Value="255"
+                                    ValueChanged="AlphaSlider_ValueChanged"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{DynamicResource CardBackgroundBrush}"
+                            BorderBrush="{DynamicResource CardBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource CardCornerRadius}"
+                            Padding="12">
+                        <StackPanel>
+                            <TextBlock Text="Hotspot"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="カーソルのクリック位置"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       Margin="0,2,0,8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="X" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBox x:Name="HotspotXTextBox" Grid.Column="1" Text="0"/>
+                                <TextBlock Text="Y" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,6,0"/>
+                                <TextBox x:Name="HotspotYTextBox" Grid.Column="3" Text="0"/>
+                            </Grid>
+                            <Button Content="座標を適用"
+                                    Click="ApplyHotspot_Click"
+                                    Margin="0,8,0,0"/>
+                            <Button x:Name="SetHotspotButton"
+                                    Content="キャンバス上をクリックして設定"
+                                    Click="SetHotspot_Click"
+                                    Margin="0,4,0,0"/>
+                            <TextBlock x:Name="EditorStatusTextBlock"
+                                       Text="32×32 CUR"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+            </Grid>
+        </ScrollViewer>
+
+        <Border x:Name="TimelinePanel"
+                Grid.Row="2"
+                Visibility="Collapsed"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource CardCornerRadius}"
+                Padding="8"
+                Margin="0,8,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <WrapPanel Grid.Row="0" VerticalAlignment="Center">
+                    <Button x:Name="PlayButton"
+                            Content="▶ 再生"
+                            Click="Play_Click"
+                            Margin="0,0,4,0"/>
+                    <Button Content="■ 停止"
+                            Click="Stop_Click"
+                            Margin="0,0,12,0"/>
+                    <Button Content="空フレーム"
+                            Click="AddEmptyFrame_Click"
+                            Margin="0,0,4,0"/>
+                    <Button Content="複製"
+                            Click="DuplicateFrame_Click"
+                            Margin="0,0,4,0"/>
+                    <Button Content="削除"
+                            Click="DeleteFrame_Click"
+                            Margin="0,0,4,0"/>
+                    <Button Content="↑"
+                            Click="MoveFrameUp_Click"
+                            Margin="0,0,2,0"/>
+                    <Button Content="↓"
+                            Click="MoveFrameDown_Click"
+                            Margin="0,0,12,0"/>
+                    <TextBlock Text="表示時間(ms)"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               Margin="0,0,6,0"/>
+                    <TextBox x:Name="FrameDurationTextBox"
+                             Width="64"
+                             Text="100"
+                             VerticalContentAlignment="Center"
+                             Margin="0,0,4,0"/>
+                    <Button Content="適用"
+                            Click="ApplyFrameDuration_Click"/>
+                </WrapPanel>
+                <ListBox x:Name="TimelineListBox"
+                         Grid.Row="1"
+                         Height="86"
+                         Margin="0,8,0,0"
+                         BorderThickness="0"
+                         SelectionChanged="TimelineListBox_SelectionChanged"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                         ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="3"
+                   x:Name="FooterTextBlock"
+                   Text="左クリックで描画できます。"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   Margin="2,10,0,0"/>
+    </Grid>
+</UserControl>

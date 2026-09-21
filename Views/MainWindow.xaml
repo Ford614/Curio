@@ -3,63 +3,127 @@
         Background="{DynamicResource WindowBackgroundBrush}"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-        Title="Curio" Height="780" Width="1060"
-        WindowStartupLocation="CenterScreen" UseLayoutRounding="True"
-        AllowDrop="True" DragOver="Window_DragOver" DragLeave="Window_DragLeave" Drop="Window_Drop" Loaded="Window_Loaded">
+        Title="Curio"
+        Height="780"
+        Width="1060"
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True"
+        AllowDrop="True"
+        DragOver="Window_DragOver"
+        DragLeave="Window_DragLeave"
+        Drop="Window_Drop"
+        Loaded="Window_Loaded">
     <Window.Resources>
-        <Style TargetType="Button" BasedOn="{StaticResource AppButtonStyle}"/>
+        <Style TargetType="Button"
+               BasedOn="{StaticResource AppButtonStyle}"/>
     </Window.Resources>
 
-    <Grid Margin="12"
-        Background="{DynamicResource WindowBackgroundBrush}">
+    <Grid x:Name="MainLayoutGrid"
+          Margin="12"
+          Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Header -->
-            <RowDefinition Height="*"/>    <!-- Main Tab Area -->
-            <RowDefinition Height="Auto"/> <!-- Splitter -->
-            <RowDefinition Height="170"/>  <!-- Log Panel -->
+            <RowDefinition Height="Auto"/>
+            <!-- Header -->
+            <RowDefinition Height="*"/>
+            <!-- Main Tab Area -->
+            <RowDefinition x:Name="MainSplitterRowDefinition" Height="Auto"/>
+            <!-- Splitter -->
+            <RowDefinition x:Name="LogRowDefinition" Height="170"/>
+            <!-- Log Panel -->
         </Grid.RowDefinitions>
 
         <!-- Drag & Drop Feedback Overlay -->
-        <Border x:Name="DragDropOverlay" Grid.RowSpan="4" Background="#E00284C7" Visibility="Collapsed" Panel.ZIndex="1000" CornerRadius="8" Margin="-4">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="📥" FontSize="48" HorizontalAlignment="Center" Foreground="White"/>
-                <TextBlock Text="ここに .cur / .ani / .zip / フォルダをドロップして追加" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,10,0,0"/>
+        <Border x:Name="DragDropOverlay"
+                Grid.RowSpan="4"
+                Background="#E00284C7"
+                Visibility="Collapsed"
+                Panel.ZIndex="1000"
+                CornerRadius="8"
+                Margin="-4">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <TextBlock Text="📥"
+                           FontSize="48"
+                           HorizontalAlignment="Center"
+                           Foreground="White"/>
+                <TextBlock Text="ここに .cur / .ani / .zip / フォルダをドロップして追加"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           Margin="0,10,0,0"/>
             </StackPanel>
         </Border>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="{DynamicResource CardHeaderBackgroundBrush}" CornerRadius="{DynamicResource CardCornerRadius}" Padding="{DynamicResource HeaderPadding}" Margin="0,0,0,10">
+        <Border Grid.Row="0"
+                Background="{DynamicResource CardHeaderBackgroundBrush}"
+                CornerRadius="{DynamicResource CardCornerRadius}"
+                Padding="{DynamicResource HeaderPadding}"
+                Margin="0,0,0,10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Text="🖱️ Curio - マウスカーソル一括インストーラー" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                    <TextBlock Text="大量の .cur / .ani / .zip ファイルを自動検出し、Windowsのマウスカーソルデザイン（スキーム）として一括登録します。" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                    <TextBlock Text="🖱️ Curio - マウスカーソル一括インストーラー"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Text="大量の .cur / .ani / .zip ファイルを自動検出し、Windowsのマウスカーソルデザイン（スキーム）として一括登録します。"
+                               FontSize="12"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               Margin="0,2,0,0"/>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button Content="❤  支援する" Click="Donate_Click" Margin="0,0,8,0" Background="{DynamicResource ControlHoverBackgroundBrush}" ToolTip="開発者を支援できます"/>
-                    <Button Content="🔗 ファイル関連付け登録" Click="RegisterAssociations_Click" Margin="0,0,8,0" Background="{DynamicResource ControlHoverBackgroundBrush}" ToolTip="右クリックや送るメニューからCurioで直接開けるようにします"/>
-                    <TextBlock Text="管理者権限不要 (HKCU)" VerticalAlignment="Center" Foreground="{DynamicResource StatusForegroundBrush}" FontWeight="SemiBold" Background="{DynamicResource StatusBackgroundBrush}" Padding="8,4" Margin="0"/>
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal">
+                    <Button Content="❤  支援する"
+                            Click="Donate_Click"
+                            Margin="0,0,8,0"
+                            Background="{DynamicResource ControlHoverBackgroundBrush}"
+                            ToolTip="開発者を支援できます"/>
+                    <Button Content="🔗 ファイル関連付け登録"
+                            Click="RegisterAssociations_Click"
+                            Margin="0,0,8,0"
+                            Background="{DynamicResource ControlHoverBackgroundBrush}"
+                            ToolTip="右クリックや送るメニューからCurioで直接開けるようにします"/>
+                    <TextBlock Text="管理者権限不要 (HKCU)"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource StatusForegroundBrush}"
+                               FontWeight="SemiBold"
+                               Background="{DynamicResource StatusBackgroundBrush}"
+                               Padding="8,4"
+                               Margin="0"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- Main Content Area -->
-        <TabControl Grid.Row="1" x:Name="MainTabControl" SelectionChanged="MainTabControl_SelectionChanged">
-            
+        <TabControl Grid.Row="1"
+                    x:Name="MainTabControl"
+                    SelectionChanged="MainTabControl_SelectionChanged">
+
             <!-- Tab 1: Batch Installer -->
-            <TabItem Header="📂 カーソル一括登録" x:Name="BatchInstallerTab">
+            <TabItem Header="📂 カーソル一括登録"
+                     x:Name="BatchInstallerTab">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/> <!-- Folder Picker -->
-                        <RowDefinition Height="*"/>    <!-- Split View: Subfolder / Files & Mapping -->
-                        <RowDefinition Height="Auto"/> <!-- Install Bar -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Folder Picker -->
+                        <RowDefinition Height="*"/>
+                        <!-- Split View: Subfolder / Files & Mapping -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Install Bar -->
                     </Grid.RowDefinitions>
 
                     <!-- Folder Picker Bar -->
-                    <Border Grid.Row="0" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource CardCornerRadius}" Padding="10" Margin="0,0,0,10">
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource CardBackgroundBrush}"
+                            BorderBrush="{DynamicResource CardBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource CardCornerRadius}"
+                            Padding="10"
+                            Margin="0,0,0,10">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -69,24 +133,48 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="入力フォルダパス:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
-                            <TextBox Grid.Column="1" x:Name="FolderPathTextBox" VerticalAlignment="Center" Padding="6,4"/>
-                            <Button Grid.Column="2" Content="参照..." Click="BrowseFolder_Click" Margin="6,0,0,0"/>
-                            <CheckBox Grid.Column="3" x:Name="SubfoldersCheckBox" Content="サブフォルダも検索" IsChecked="True" VerticalAlignment="Center" Margin="12,0,0,0"/>
-                            <Button Grid.Column="4" Content="🔍 カーソル検索" Click="AutoMatchRoles_Click" Background="{DynamicResource PrimaryAccentBrush}" Foreground="{DynamicResource PrimaryAccentForegroundBrush}" FontWeight="Bold" Margin="12,0,0,0"/>
+                            <TextBlock Text="入力フォルダパス:"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,8,0"/>
+                            <TextBox Grid.Column="1"
+                                     x:Name="FolderPathTextBox"
+                                     VerticalAlignment="Center"
+                                     Padding="6,4"/>
+                            <Button Grid.Column="2"
+                                    Content="参照..."
+                                    Click="BrowseFolder_Click"
+                                    Margin="6,0,0,0"/>
+                            <CheckBox Grid.Column="3"
+                                      x:Name="SubfoldersCheckBox"
+                                      Content="サブフォルダも検索"
+                                      IsChecked="True"
+                                      VerticalAlignment="Center"
+                                      Margin="12,0,0,0"/>
+                            <Button Grid.Column="4"
+                                    Content="🔍 カーソル検索"
+                                    Click="AutoMatchRoles_Click"
+                                    Background="{DynamicResource PrimaryAccentBrush}"
+                                    Foreground="{DynamicResource PrimaryAccentForegroundBrush}"
+                                    FontWeight="Bold"
+                                    Margin="12,0,0,0"/>
                         </Grid>
                     </Border>
 
                     <!-- Mapping & Preview Area -->
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="260"/> <!-- Folder/File list sidebar -->
-                            <ColumnDefinition Width="6"/>   <!-- Splitter -->
-                            <ColumnDefinition Width="*"/>   <!-- Role Mapping Table -->
+                            <ColumnDefinition Width="260"/>
+                            <!-- Folder/File list sidebar -->
+                            <ColumnDefinition Width="6"/>
+                            <!-- Splitter -->
+                            <ColumnDefinition Width="*"/>
+                            <!-- Role Mapping Table -->
                         </Grid.ColumnDefinitions>
 
                         <!-- Left Sidebar: Subfolders / Scanned Files -->
-                        <Grid Grid.Column="0" Margin="4">
+                        <Grid Grid.Column="0"
+                              Margin="4">
 
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -128,7 +216,8 @@
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Margin="2">
+                                            <StackPanel Orientation="Horizontal"
+                                                        Margin="2">
                                                 <Image Source="{Binding Preview}"
                                                        Width="20"
                                                        Height="20"
@@ -144,39 +233,74 @@
                                 </ListBox>
 
                             </Border>
+
+                            <Button Grid.Row="4"
+                                    Content="一覧をクリア"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,8,0,0"
+                                    Click="ClearDetectedFilesButton_Click"/>
+
                         </Grid>
 
-                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource CardBorderBrush}"/>
+                        <GridSplitter Grid.Column="1"
+                                      HorizontalAlignment="Stretch"
+                                      Background="{DynamicResource CardBorderBrush}"/>
 
                         <!-- Right Area: Role Mapping Table -->
-                        <GroupBox Grid.Column="2" Header="カーソル役割割り当て (自動検出済み)">
-                            <DataGrid x:Name="RoleMappingDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource CardBorderBrush}">
+                        <GroupBox Grid.Column="2"
+                                  Header="カーソル役割割り当て (自動検出済み)">
+                            <DataGrid x:Name="RoleMappingDataGrid"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="{DynamicResource CardBorderBrush}">
                                 <DataGrid.Columns>
                                     <!-- Role Icon Preview -->
-                                    <DataGridTemplateColumn Header="プレビュー" Width="70">
+                                    <DataGridTemplateColumn Header="プレビュー"
+                                                            Width="70">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Border Width="36" Height="36" Background="{DynamicResource ControlBackgroundBrush}" BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2">
-                                                    <Image Source="{Binding Preview}" Width="32" Height="32" Stretch="Uniform"/>
+                                                <Border Width="36"
+                                                        Height="36"
+                                                        Background="{DynamicResource ControlBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="4"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Margin="2">
+                                                    <Image Source="{Binding Preview}"
+                                                           Width="32"
+                                                           Height="32"
+                                                           Stretch="Uniform"/>
                                                 </Border>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
                                     <!-- Role Name -->
-                                    <DataGridTemplateColumn Header="カーソル役割 (Windows標準)" Width="200">
+                                    <DataGridTemplateColumn Header="カーソル役割 (Windows標準)"
+                                                            Width="200">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <StackPanel VerticalAlignment="Center" Margin="4">
-                                                    <TextBlock Text="{Binding Role.DisplayName}" FontWeight="Bold" FontSize="12"/>
-                                                    <TextBlock Text="{Binding Role.Description}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                <StackPanel VerticalAlignment="Center"
+                                                            Margin="4">
+                                                    <TextBlock Text="{Binding Role.DisplayName}"
+                                                               FontWeight="Bold"
+                                                               FontSize="12"/>
+                                                    <TextBlock Text="{Binding Role.Description}"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
                                     <!-- Assigned File Picker -->
-                                    <DataGridTemplateColumn Header="割り当てファイル (.cur / .ani)" Width="*">
+                                    <DataGridTemplateColumn Header="割り当てファイル (.cur / .ani)"
+                                                            Width="*">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Grid Margin="4">
@@ -185,9 +309,20 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <ComboBox Grid.Column="0" ItemsSource="{Binding DataContext.ScannedFiles, RelativeSource={RelativeSource AncestorType=Window}}" SelectedItem="{Binding SelectedFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
-                                                    <Button Grid.Column="1" Content="参照" Click="BrowseSingleFile_Click" Margin="4,0,0,0" ToolTip="個別ファイルを選択"/>
-                                                    <Button Grid.Column="2" Content="解除" Click="ClearMapping_Click" Margin="4,0,0,0" ToolTip="割り当てを解除"/>
+                                                    <ComboBox Grid.Column="0"
+                                                              ItemsSource="{Binding DataContext.ScannedFiles, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              SelectedItem="{Binding SelectedFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                              VerticalAlignment="Center"/>
+                                                    <Button Grid.Column="1"
+                                                            Content="参照"
+                                                            Click="BrowseSingleFile_Click"
+                                                            Margin="4,0,0,0"
+                                                            ToolTip="個別ファイルを選択"/>
+                                                    <Button Grid.Column="2"
+                                                            Content="解除"
+                                                            Click="ClearMapping_Click"
+                                                            Margin="4,0,0,0"
+                                                            ToolTip="割り当てを解除"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -198,7 +333,13 @@
                     </Grid>
 
                     <!-- Bottom Install Options Bar -->
-                    <Border Grid.Row="2" Background="{DynamicResource CardHeaderBackgroundBrush}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource CardCornerRadius}" Padding="12,8" Margin="0,10,0,0">
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource CardHeaderBackgroundBrush}"
+                            BorderBrush="{DynamicResource CardBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource CardCornerRadius}"
+                            Padding="12,8"
+                            Margin="0,10,0,0">
                         <StackPanel>
                             <!-- Storage Path Configuration Row -->
                             <Grid Margin="0,0,0,6">
@@ -208,10 +349,24 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="📁 保存先フォルダ:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0" ToolTip="登録したスキームのカーソルファイルが保管されるフォルダ"/>
-                                <TextBox Grid.Column="1" x:Name="StoragePathTextBox" VerticalAlignment="Center" Padding="4,2" TextChanged="StoragePathTextBox_TextChanged"/>
-                                <Button Grid.Column="2" Content="変更..." Click="BrowseStorageFolder_Click" Margin="6,0,0,0"/>
-                                <Button Grid.Column="3" Content="初期値に戻す" Click="ResetStorageFolder_Click" Margin="4,0,0,0"/>
+                                <TextBlock Text="📁 保存先フォルダ:"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,8,0"
+                                           ToolTip="登録したスキームのカーソルファイルが保管されるフォルダ"/>
+                                <TextBox Grid.Column="1"
+                                         x:Name="StoragePathTextBox"
+                                         VerticalAlignment="Center"
+                                         Padding="4,2"
+                                         TextChanged="StoragePathTextBox_TextChanged"/>
+                                <Button Grid.Column="2"
+                                        Content="変更..."
+                                        Click="BrowseStorageFolder_Click"
+                                        Margin="6,0,0,0"/>
+                                <Button Grid.Column="3"
+                                        Content="初期値に戻す"
+                                        Click="ResetStorageFolder_Click"
+                                        Margin="4,0,0,0"/>
                             </Grid>
 
                             <!-- Scheme Name & Action Row -->
@@ -223,12 +378,32 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="登録スキーム名:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
-                                <TextBox Grid.Column="1" x:Name="SchemeNameTextBox" VerticalAlignment="Center" Padding="6,4" FontSize="13" Text="カスタムカーソル"/>
+                                <TextBlock Text="登録スキーム名:"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Margin="0,0,8,0"/>
+                                <TextBox Grid.Column="1"
+                                         x:Name="SchemeNameTextBox"
+                                         VerticalAlignment="Center"
+                                         Padding="6,4"
+                                         FontSize="13"
+                                         Text="カスタムカーソル"/>
 
-                                <CheckBox Grid.Column="2" x:Name="ApplyImmediatelyCheckBox" Content="インストール後にこのスキームを今すぐ適用する" IsChecked="True" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                                <CheckBox Grid.Column="2"
+                                          x:Name="ApplyImmediatelyCheckBox"
+                                          Content="インストール後にこのスキームを今すぐ適用する"
+                                          IsChecked="True"
+                                          VerticalAlignment="Center"
+                                          Margin="16,0,0,0"/>
 
-                                <Button Grid.Column="3" Content="⚡ 一括インストール" Click="InstallButton_Click" Background="{DynamicResource SuccessAccentBrush}" Foreground="{DynamicResource PrimaryAccentForegroundBrush}" FontWeight="Bold" FontSize="14" Padding="16,6"/>
+                                <Button Grid.Column="3"
+                                        Content="⚡ 一括インストール"
+                                        Click="InstallButton_Click"
+                                        Background="{DynamicResource SuccessAccentBrush}"
+                                        Foreground="{DynamicResource PrimaryAccentForegroundBrush}"
+                                        FontWeight="Bold"
+                                        FontSize="14"
+                                        Padding="16,6"/>
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -244,38 +419,63 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="現在Windows（レジストリ）に登録されているカーソルスキーム一覧です。選択して削除（アンインストール）や適用が行えます。" Margin="0,0,0,10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <TextBlock Grid.Row="0"
+                               Text="現在Windows（レジストリ）に登録されているカーソルスキーム一覧です。選択して削除（アンインストール）や適用が行えます。"
+                               Margin="0,0,0,10"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
 
-                    <ListView Grid.Row="1" x:Name="InstalledSchemesListView" SelectionChanged="InstalledSchemesListView_SelectionChanged">
+                    <ListView Grid.Row="1"
+                              x:Name="InstalledSchemesListView"
+                              SelectionChanged="InstalledSchemesListView_SelectionChanged">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="スキーム名" Width="220">
+                                <GridViewColumn Header="スキーム名"
+                                                Width="220">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center"/>
-                                                <Border Visibility="{Binding IsCurrentActive, Converter={StaticResource BooleanToVisibilityConverter}}" Background="{DynamicResource StatusBackgroundBrush}" BorderBrush="{DynamicResource StatusBorderBrush}" BorderThickness="1" CornerRadius="3" Margin="8,0,0,0" Padding="4,1">
-                                                    <TextBlock Text="現在適用中" Foreground="{DynamicResource StatusForegroundBrush}" FontSize="10" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontWeight="Bold"
+                                                           VerticalAlignment="Center"/>
+                                                <Border Visibility="{Binding IsCurrentActive, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="{DynamicResource StatusBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource StatusBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="3"
+                                                        Margin="8,0,0,0"
+                                                        Padding="4,1">
+                                                    <TextBlock Text="現在適用中"
+                                                               Foreground="{DynamicResource StatusForegroundBrush}"
+                                                               FontSize="10"
+                                                               FontWeight="Bold"/>
                                                 </Border>
                                             </StackPanel>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Header="アプリ管理" Width="100">
+                                <GridViewColumn Header="アプリ管理"
+                                                Width="100">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding IsManagedByApp, StringFormat={}{0}}" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding IsManagedByApp, StringFormat={}{0}}"
+                                                       VerticalAlignment="Center">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsManagedByApp}" Value="True">
-                                                                <Setter Property="Text" Value="本アプリ登録"/>
-                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryAccentBrush}"/>
+                                                            <DataTrigger Binding="{Binding IsManagedByApp}"
+                                                                         Value="True">
+                                                                <Setter Property="Text"
+                                                                        Value="本アプリ登録"/>
+                                                                <Setter Property="Foreground"
+                                                                        Value="{DynamicResource PrimaryAccentBrush}"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding IsManagedByApp}" Value="False">
-                                                                <Setter Property="Text" Value="外部/システム"/>
-                                                                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                            <DataTrigger Binding="{Binding IsManagedByApp}"
+                                                                         Value="False">
+                                                                <Setter Property="Text"
+                                                                        Value="外部/システム"/>
+                                                                <Setter Property="Foreground"
+                                                                        Value="{DynamicResource TextSecondaryBrush}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -285,10 +485,15 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Header="登録レジストリデータ (一部)" Width="500">
+                                <GridViewColumn Header="登録レジストリデータ (一部)"
+                                                Width="500">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding RawRegistryString}" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" ToolTip="{Binding RawRegistryString}"/>
+                                            <TextBlock Text="{Binding RawRegistryString}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       FontSize="11"
+                                                       ToolTip="{Binding RawRegistryString}"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -297,31 +502,84 @@
                     </ListView>
 
                     <!-- Management Bar -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                        <Button Content="🔄 一覧更新" Click="RefreshInstalledSchemes_Click" Margin="0,0,8,0"/>
-                        <Button x:Name="ApplySelectedSchemeButton" Content="今すぐ適用" Click="ApplySelectedScheme_Click" IsEnabled="False" Margin="0,0,8,0"/>
-                        <Button x:Name="DeleteSelectedSchemeButton" Content="❌ 選択したスキームを削除" Click="DeleteSelectedScheme_Click" IsEnabled="False" Background="{DynamicResource DangerBrush}" Foreground="{DynamicResource PrimaryAccentForegroundBrush}" FontWeight="Bold"/>
+                    <StackPanel Grid.Row="2"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Margin="0,10,0,0">
+                        <Button Content="🔄 一覧更新"
+                                Click="RefreshInstalledSchemes_Click"
+                                Margin="0,0,8,0"/>
+                        <Button x:Name="ApplySelectedSchemeButton"
+                                Content="今すぐ適用"
+                                Click="ApplySelectedScheme_Click"
+                                IsEnabled="False"
+                                Margin="0,0,8,0"/>
+                        <Button x:Name="DeleteSelectedSchemeButton"
+                                Content="❌ 選択したスキームを削除"
+                                Click="DeleteSelectedScheme_Click"
+                                IsEnabled="False"
+                                Background="{DynamicResource DangerBrush}"
+                                Foreground="{DynamicResource PrimaryAccentForegroundBrush}"
+                                FontWeight="Bold"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
 
             <!-- Tab 3: Cursor Creator -->
-            <TabItem Header="🎨 カーソル作成 (β)">
-                <Grid Margin="10">
-                    <TextBlock Text="カーソル作成機能は現在開発中です。今後のアップデートで追加予定です。" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Grid>
+            <TabItem Header="🎨 カーソル作成">
+                <Border Margin="10"
+                        Background="{DynamicResource CardBackgroundBrush}"
+                        BorderBrush="{DynamicResource CardBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{DynamicResource CardCornerRadius}"
+                        Padding="24">
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="カーソルを作成・編集"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="32×32のCURファイルを編集できます。"
+                                   Margin="0,6,0,16"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   HorizontalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                            <Button Content="新規カーソルを作成"
+                                    Click="CreatePaintEditor_Click"
+                                    Background="{DynamicResource PrimaryAccentBrush}"
+                                    Foreground="{DynamicResource PrimaryAccentForegroundBrush}"
+                                    FontWeight="SemiBold"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="既存のCURを開く"
+                                    Click="OpenPaintEditor_Click"/>
+                            <Button Content="選択中のCURを編集"
+                                    Click="EditSelectedPaintEditor_Click"
+                                    Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </TabItem>
 
             <!-- Tab 4: Web Cursor Browser -->
             <TabItem Header="🌐 Webでカーソルを探す">
                 <Grid Margin="6">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/> <!-- Browser Navigation Bar -->
-                        <RowDefinition Height="*"/>    <!-- WebView2 Area -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Browser Navigation Bar -->
+                        <RowDefinition Height="*"/>
+                        <!-- WebView2 Area -->
                     </Grid.RowDefinitions>
 
                     <!-- Navigation Bar -->
-                    <Border Grid.Row="0" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource CardCornerRadius}" Padding="6" Margin="0,0,0,6">
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource CardBackgroundBrush}"
+                            BorderBrush="{DynamicResource CardBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource CardCornerRadius}"
+                            Padding="6"
+                            Margin="0,0,0,6">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -333,13 +591,43 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <Button Grid.Column="0" Content="◀" Click="WebNavBack_Click" ToolTip="戻る" Width="32"/>
-                            <Button Grid.Column="1" Content="▶" Click="WebNavForward_Click" ToolTip="進む" Width="32"/>
-                            <Button Grid.Column="2" Content="↻" Click="WebNavRefresh_Click" ToolTip="再読み込み" Width="32"/>
-                            <Button Grid.Column="3" Content="🏠" Click="WebNavHome_Click" ToolTip="カーソル配布サイトを開く" Width="32"/>
-                            <Button Grid.Column="4" Content="🔗" Click="WebNavSetDefault_Click" ToolTip="デフォルトリンクを変更" Width="32"/>
-                            <TextBox Grid.Column="5" x:Name="WebUrlTextBox" VerticalAlignment="Center" Padding="6,4" Margin="6,0" KeyDown="WebUrlTextBox_KeyDown"/>
-                            <Button Grid.Column="6" Content="移動" Click="WebNavGo_Click" Background="{DynamicResource PrimaryAccentBrush}" Foreground="{DynamicResource PrimaryAccentForegroundBrush}" FontWeight="Bold"/>
+                            <Button Grid.Column="0"
+                                    Content="◀"
+                                    Click="WebNavBack_Click"
+                                    ToolTip="戻る"
+                                    Width="32"/>
+                            <Button Grid.Column="1"
+                                    Content="▶"
+                                    Click="WebNavForward_Click"
+                                    ToolTip="進む"
+                                    Width="32"/>
+                            <Button Grid.Column="2"
+                                    Content="↻"
+                                    Click="WebNavRefresh_Click"
+                                    ToolTip="再読み込み"
+                                    Width="32"/>
+                            <Button Grid.Column="3"
+                                    Content="🏠"
+                                    Click="WebNavHome_Click"
+                                    ToolTip="カーソル配布サイトを開く"
+                                    Width="32"/>
+                            <Button Grid.Column="4"
+                                    Content="🔗"
+                                    Click="WebNavSetDefault_Click"
+                                    ToolTip="デフォルトリンクを変更"
+                                    Width="32"/>
+                            <TextBox Grid.Column="5"
+                                     x:Name="WebUrlTextBox"
+                                     VerticalAlignment="Center"
+                                     Padding="6,4"
+                                     Margin="6,0"
+                                     KeyDown="WebUrlTextBox_KeyDown"/>
+                            <Button Grid.Column="6"
+                                    Content="移動"
+                                    Click="WebNavGo_Click"
+                                    Background="{DynamicResource PrimaryAccentBrush}"
+                                    Foreground="{DynamicResource PrimaryAccentForegroundBrush}"
+                                    FontWeight="Bold"/>
                         </Grid>
                     </Border>
 
@@ -348,19 +636,51 @@
                         <wv2:WebView2 x:Name="WebViewControl"/>
 
                         <!-- Notification Toast Popup Overlay -->
-                <Border x:Name="WebToastNotification" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16" Background="{DynamicResource CardHeaderBackgroundBrush}" BorderBrush="{DynamicResource PrimaryAccentBrush}" BorderThickness="2" CornerRadius="8" Padding="14,10" Visibility="Collapsed" Width="340">
+                        <Border x:Name="WebToastNotification"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Margin="16"
+                                Background="{DynamicResource CardHeaderBackgroundBrush}"
+                                BorderBrush="{DynamicResource PrimaryAccentBrush}"
+                                BorderThickness="2"
+                                CornerRadius="8"
+                                Padding="14,10"
+                                Visibility="Collapsed"
+                                Width="340">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
-                                    <TextBlock Text="⚡" FontSize="18" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock x:Name="WebToastTitleTextBlock" Text="カーソルファイルを検出しました" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Row="0"
+                                            Orientation="Horizontal"
+                                            Margin="0,0,0,8">
+                                    <TextBlock Text="⚡"
+                                               FontSize="18"
+                                               Margin="0,0,6,0"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="WebToastTitleTextBlock"
+                                               Text="カーソルファイルを検出しました"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               FontWeight="Bold"
+                                               FontSize="13"
+                                               VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="一括登録画面で開く" Click="WebToastOpen_Click" Background="{DynamicResource SuccessAccentBrush}" Foreground="{DynamicResource PrimaryAccentForegroundBrush}" FontWeight="Bold" Margin="0,0,6,0" Padding="8,4"/>
-                                    <Button Content="閉じる" Click="WebToastClose_Click" Background="{DynamicResource ControlBorderBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Padding="8,4"/>
+                                <StackPanel Grid.Row="1"
+                                            Orientation="Horizontal"
+                                            HorizontalAlignment="Right">
+                                    <Button Content="一括登録画面で開く"
+                                            Click="WebToastOpen_Click"
+                                            Background="{DynamicResource SuccessAccentBrush}"
+                                            Foreground="{DynamicResource PrimaryAccentForegroundBrush}"
+                                            FontWeight="Bold"
+                                            Margin="0,0,6,0"
+                                            Padding="8,4"/>
+                                    <Button Content="閉じる"
+                                            Click="WebToastClose_Click"
+                                            Background="{DynamicResource ControlBorderBrush}"
+                                            Foreground="{DynamicResource TextPrimaryBrush}"
+                                            Padding="8,4"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -371,43 +691,81 @@
             <!-- Tab 5: Settings -->
             <TabItem Header="⚙️ 設定">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="20" MaxWidth="700">
+                    <StackPanel Margin="20"
+                                MaxWidth="700">
 
                         <!-- Header -->
-                        <TextBlock Text="設定" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBlock Text="Curioの動作や表示に関する設定を変更できます。" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,20"/>
+                        <TextBlock Text="設定"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Curioの動作や表示に関する設定を変更できます。"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Margin="0,4,0,20"/>
 
                         <!-- 一般 -->
-                        <GroupBox Header="一般" Padding="12" Margin="0,0,0,12">
+                        <GroupBox Header="一般"
+                                  Padding="12"
+                                  Margin="0,0,0,12">
                             <StackPanel>
-                                <TextBlock Text="デフォルトURL" FontWeight="SemiBold"/>
-                                <TextBlock Text="Webタブを開いたときに使用するURLです。" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,6"/>
+                                <TextBlock Text="デフォルトURL"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Text="Webタブを開いたときに使用するURLです。"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,2,0,6"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBox x:Name="SettingsDefaultUrlTextBox" Grid.Column="0" Padding="8,6"/>
-                                    <Button Grid.Column="1" Content="保存" Click="SettingsSaveDefaultUrl_Click" Margin="8,0,0,0" Padding="16,5"/>
+                                    <TextBox x:Name="SettingsDefaultUrlTextBox"
+                                             Grid.Column="0"
+                                             Padding="8,6"/>
+                                    <Button Grid.Column="1"
+                                            Content="保存"
+                                            Click="SettingsSaveDefaultUrl_Click"
+                                            Margin="8,0,0,0"
+                                            Padding="16,5"/>
                                 </Grid>
                             </StackPanel>
                         </GroupBox>
 
                         <!-- 外観 -->
-                        <GroupBox Header="外観" Padding="12" Margin="0,0,0,12">
+                        <GroupBox Header="外観"
+                                  Padding="12"
+                                  Margin="0,0,0,12">
                             <StackPanel>
-                                <TextBlock Text="テーマ" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBlock Text="Curioの表示テーマを選択します。" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,6"/>
-                                <ComboBox x:Name="ThemeComboBox" Width="200" HorizontalAlignment="Left" SelectionChanged="ThemeComboBox_SelectionChanged" Margin="0,0,0,12">
+                                <TextBlock Text="テーマ"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Curioの表示テーマを選択します。"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,2,0,6"/>
+                                <ComboBox x:Name="ThemeComboBox"
+                                          Width="200"
+                                          HorizontalAlignment="Left"
+                                          SelectionChanged="ThemeComboBox_SelectionChanged"
+                                          Margin="0,0,0,12">
                                     <ComboBoxItem Content="システム"/>
                                     <ComboBoxItem Content="ライト"/>
                                     <ComboBoxItem Content="ダーク"/>
                                 </ComboBox>
 
-                                <TextBlock Text="UIスタイル" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBlock Text="Curioの表示スタイルを選択します。" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,6"/>
-                                <ComboBox x:Name="UIStyleComboBox" Width="200" HorizontalAlignment="Left" SelectionChanged="UIStyleComboBox_SelectionChanged">
+                                <TextBlock Text="UIスタイル"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Curioの表示スタイルを選択します。"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,2,0,6"/>
+                                <ComboBox x:Name="UIStyleComboBox"
+                                          Width="200"
+                                          HorizontalAlignment="Left"
+                                          SelectionChanged="UIStyleComboBox_SelectionChanged">
                                     <ComboBoxItem Content="Modern"/>
                                     <ComboBoxItem Content="OLD"/>
                                 </ComboBox>
@@ -415,19 +773,38 @@
                         </GroupBox>
 
                         <!-- サポート -->
-                        <GroupBox Header="サポート" Padding="12" Margin="0,0,0,12">
+                        <GroupBox Header="サポート"
+                                  Padding="12"
+                                  Margin="0,0,0,12">
                             <StackPanel>
-                                <Button Content="❤  開発者を支援する" Click="Donate_Click" HorizontalAlignment="Left" Padding="16,7" Margin="0,0,0,8"/>
-                                <Button Content="✉  サポートに連絡" Click="SupportEmail_Click" HorizontalAlignment="Left" Padding="16,7" Margin="0,0,0,8"/>
-                                <Button Content="GitHub" Click="GitHub_Click" HorizontalAlignment="Left" Padding="16,7"/>
+                                <Button Content="❤  開発者を支援する"
+                                        Click="Donate_Click"
+                                        HorizontalAlignment="Left"
+                                        Padding="16,7"
+                                        Margin="0,0,0,8"/>
+                                <Button Content="✉  サポートに連絡"
+                                        Click="SupportEmail_Click"
+                                        HorizontalAlignment="Left"
+                                        Padding="16,7"
+                                        Margin="0,0,0,8"/>
+                                <Button Content="GitHub"
+                                        Click="GitHub_Click"
+                                        HorizontalAlignment="Left"
+                                        Padding="16,7"/>
                             </StackPanel>
                         </GroupBox>
 
                         <!-- バージョン -->
-                        <GroupBox Header="バージョン情報" Padding="12">
+                        <GroupBox Header="バージョン情報"
+                                  Padding="12">
                             <StackPanel>
-                                <TextBlock Text="Curio" FontWeight="Bold" FontSize="16"/>
-                                <TextBlock Text="バージョン 1.0.0" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                                <TextBlock Text="Curio"
+                                           FontWeight="Bold"
+                                           FontSize="16"/>
+                                <TextBlock Text="バージョン 1.0.0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,2,0,0"/>
                             </StackPanel>
                         </GroupBox>
 
@@ -436,17 +813,44 @@
             </TabItem>
         </TabControl>
 
-        <GridSplitter Grid.Row="2" Height="4" HorizontalAlignment="Stretch" Background="{DynamicResource CardBorderBrush}"/>
+        <!-- The editor is hosted inside MainWindow so editing never opens a second window. -->
+        <ContentControl x:Name="PaintEditorHost"
+                        Grid.Row="1"
+                        Visibility="Collapsed"
+                        Panel.ZIndex="10"/>
+
+        <GridSplitter x:Name="MainSplitter"
+                      Grid.Row="2"
+                      Height="4"
+                      HorizontalAlignment="Stretch"
+                      Background="{DynamicResource CardBorderBrush}"/>
 
         <!-- Bottom Log Output Panel -->
-        <GroupBox Grid.Row="3" Header="処理ログ / 実行結果" MinHeight="150">
+        <GroupBox x:Name="LogPanel"
+                  Grid.Row="3"
+                  Header="処理ログ / 実行結果"
+                  MinHeight="150">
             <Grid Margin="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBox Grid.Row="0" x:Name="LogTextBox" MinHeight="90" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas, Cascadia Code, Courier New" FontSize="11" Background="{DynamicResource LogBackgroundBrush}" Foreground="{DynamicResource LogForegroundBrush}" Padding="6"/>
-                <Button Grid.Row="1" Content="ログクリア" Click="ClearLog_Click" HorizontalAlignment="Right" Margin="0,4,0,0"/>
+                <TextBox Grid.Row="0"
+                         x:Name="LogTextBox"
+                         MinHeight="90"
+                         IsReadOnly="True"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         FontFamily="Consolas, Cascadia Code, Courier New"
+                         FontSize="11"
+                         Background="{DynamicResource LogBackgroundBrush}"
+                         Foreground="{DynamicResource LogForegroundBrush}"
+                         Padding="6"/>
+                <Button Grid.Row="1"
+                        Content="ログクリア"
+                        Click="ClearLog_Click"
+                        HorizontalAlignment="Right"
+                        Margin="0,4,0,0"/>
             </Grid>
         </GroupBox>
     </Grid>
