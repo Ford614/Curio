@@ -26,9 +26,11 @@
             <!-- Header -->
             <RowDefinition Height="*"/>
             <!-- Main Tab Area -->
-            <RowDefinition x:Name="MainSplitterRowDefinition" Height="Auto"/>
+            <RowDefinition x:Name="MainSplitterRowDefinition"
+                    Height="Auto"/>
             <!-- Splitter -->
-            <RowDefinition x:Name="LogRowDefinition" Height="170"/>
+            <RowDefinition x:Name="LogRowDefinition"
+                    Height="170"/>
             <!-- Log Panel -->
         </Grid.RowDefinitions>
 
@@ -807,6 +809,16 @@
                                            Margin="0,2,0,0"/>
                             </StackPanel>
                         </GroupBox>
+                        <TextBlock Text="© 2026 Curio Project"
+                                   FontSize="10"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,20,0,0"/>
+                        <TextBlock Text="About : Curio Source Available License / Third-party licenses"
+                                   FontSize="10"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,20,0,0"/>
 
                     </StackPanel>
                 </ScrollViewer>
