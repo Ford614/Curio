@@ -93,13 +93,6 @@
                             Margin="0,0,8,0"
                             Background="{DynamicResource ControlHoverBackgroundBrush}"
                             ToolTip="{DynamicResource RegisterAssociationToolTip}"/>
-                    <TextBlock Text="{DynamicResource AdminNoElevation}"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource StatusForegroundBrush}"
-                               FontWeight="SemiBold"
-                               Background="{DynamicResource StatusBackgroundBrush}"
-                               Padding="8,4"
-                               Margin="0"/>
                 </StackPanel>
             </Grid>
         </Border>

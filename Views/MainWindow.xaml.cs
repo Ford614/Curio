@@ -130,17 +130,38 @@ namespace Curio.Views
         {
             try
             {
-                await WebViewControl.EnsureCoreWebView2Async();
-                _isWebViewInitialized = true;
+                string webViewDataFolder = Path.Combine(
+     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+     "Curio",
+     "WebView2"
+ );
+
+                Directory.CreateDirectory(webViewDataFolder);
+
+                var environment = await CoreWebView2Environment.CreateAsync(
+                    userDataFolder: webViewDataFolder
+                );
+
+                await WebViewControl.EnsureCoreWebView2Async(environment);
 
                 WebViewControl.CoreWebView2.DownloadStarting += CoreWebView2_DownloadStarting;
                 WebViewControl.CoreWebView2.SourceChanged += CoreWebView2_SourceChanged;
 
+                // 初期URLを読み込む
+                if (!string.IsNullOrWhiteSpace(_settings.DefaultUrl))
+                {
+                    WebViewControl.CoreWebView2.Navigate(_settings.DefaultUrl);
+                }
+
                 AppendLog("[Webブラウザ] WebView2 の初期化が完了しました。");
+                await WebViewControl.EnsureCoreWebView2Async(environment);
+
+                _isWebViewInitialized = true;
             }
             catch (Exception ex)
             {
-                AppendLog($"[Webブラウザエラー] WebView2の初期化に失敗しました: {ex.Message}");
+                AppendLog($"[Webブラウザエラー] WebView2の初期化に失敗しました。");
+                AppendLog($"[Webブラウザエラー] {ex}");
             }
         }
 
@@ -309,10 +330,10 @@ namespace Curio.Views
         #region Unified Import Pipeline
 
         private void ClearDetectedFilesButton_Click(object sender, RoutedEventArgs e)
-{
-    ScannedFiles.Clear();
-    ScanSummaryTextBlock.Text = "フォルダ選択またはドラッグ＆ドロップしてください";
-}
+        {
+            ScannedFiles.Clear();
+            ScanSummaryTextBlock.Text = "フォルダ選択またはドラッグ＆ドロップしてください";
+        }
 
         private void ProcessIncomingFiles(IEnumerable<string> paths, bool isWebDownload)
         {
@@ -618,7 +639,7 @@ namespace Curio.Views
 
         private void SupportEmail_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://github.com/issues");
+            OpenBrowser("https://github.com/Ford614/Curio/issues");
         }
 
         private void GitHub_Click(object sender, RoutedEventArgs e)

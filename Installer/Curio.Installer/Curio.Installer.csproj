@@ -1,0 +1,17 @@
+﻿<Project Sdk="WixToolset.Sdk/7.0.0">
+
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <OutputName>Curio-v1.0.0-win-x64</OutputName>
+    <InstallerPlatform>x64</InstallerPlatform>
+
+    <DefineConstants>
+      PublishDir=$(MSBuildProjectDirectory)\..\..\publish
+    </DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,63 @@
+```xml
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <!-- Curio のアプリ情報 -->
+  <Package
+      Name="Curio"
+      Manufacturer="Ford614"
+      Version="1.0.0.0"
+      UpgradeCode="PUT-YOUR-GUID-HERE">
+
+    <!-- 古いバージョンからのアップグレードを許可 -->
+    <MajorUpgrade
+        DowngradeErrorMessage="Curioの新しいバージョンがすでにインストールされています。" />
+
+    <!-- MSI内部にCABを埋め込む -->
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- インストール先 -->
+    <StandardDirectory Id="ProgramFilesFolder">
+
+      <Directory Id="INSTALLFOLDER" Name="Curio">
+
+        <!-- Curio本体 -->
+        <Component Id="MainExecutable">
+
+          <File
+              Id="CurioExe"
+              Source="publish\Curio.exe"
+              KeyPath="yes">
+
+            <!-- デスクトップショートカット -->
+            <Shortcut
+                Id="DesktopShortcut"
+                Directory="DesktopFolder"
+                Name="Curio"
+                WorkingFolder="INSTALLFOLDER"
+                Advertise="no" />
+
+          </File>
+
+        </Component>
+
+      </Directory>
+
+    </StandardDirectory>
+
+    <!-- デスクトップフォルダ -->
+    <StandardDirectory Id="DesktopFolder" />
+
+    <!-- インストール機能 -->
+    <Feature
+        Id="MainFeature"
+        Title="Curio"
+        Level="1">
+
+      <ComponentRef Id="MainExecutable" />
+
+    </Feature>
+
+  </Package>
+
+</Wix>
+```
