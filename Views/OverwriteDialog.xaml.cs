@@ -1,4 +1,5 @@
 using System.Windows;
+using Curio.Services;
 
 namespace Curio.Views
 {
@@ -17,7 +18,7 @@ namespace Curio.Views
         public OverwriteDialog(string existingSchemeName)
         {
             InitializeComponent();
-            MessageTextBlock.Text = $"スキーム名 '{existingSchemeName}' は既に登録されています。\n動作を選択してください。";
+            MessageTextBlock.Text = LocalizationService.Format("OverwriteMessage", existingSchemeName);
             NewNameTextBox.Text = $"{existingSchemeName}_Copy";
             ResultSchemeName = existingSchemeName;
         }
@@ -33,7 +34,7 @@ namespace Curio.Views
             string newName = NewNameTextBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(newName))
             {
-                MessageBox.Show("新しいスキーム名を入力してください。", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(LocalizationService.Get("NewNameRequired"), LocalizationService.Get("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

@@ -149,7 +149,7 @@ namespace Curio.Views.PaintEditor
             _isSelecting = false;
             _isDraggingHotspot = false;
             TimelinePanel.Visibility = _isAnimation ? Visibility.Visible : Visibility.Collapsed;
-            SaveButton.Content = _isAnimation ? "ANI保存" : "保存";
+            SaveButton.Content = LocalizationService.Get(_isAnimation ? "EditorSaveAni" : "EditorSave");
 
             if (clearHistory)
             {
@@ -237,7 +237,7 @@ namespace Curio.Views.PaintEditor
             HotspotYTextBox.Text = _image.HotspotY.ToString();
             SelectCanvasSizeItem(_image.Width);
             TimelinePanel.Visibility = _isAnimation ? Visibility.Visible : Visibility.Collapsed;
-            SaveButton.Content = _isAnimation ? "ANI保存" : "保存";
+            SaveButton.Content = LocalizationService.Get(_isAnimation ? "EditorSaveAni" : "EditorSave");
             _selection = null;
             RenderCanvas();
             UpdateHistoryButtons();
@@ -307,7 +307,7 @@ namespace Curio.Views.PaintEditor
             _frames = new List<CursorCanvasImage> { CreateBlankImage() };
             _frameDelaysMs = new List<int> { 100 };
             TimelinePanel.Visibility = Visibility.Collapsed;
-            SaveButton.Content = "保存";
+            SaveButton.Content = LocalizationService.Get("EditorSave");
             LoadImageState(_frames[0], clearHistory: true);
             FooterTextBlock.Text = "新しい32×32キャンバスを作成しました。";
         }
@@ -1129,7 +1129,7 @@ namespace Curio.Views.PaintEditor
 
             _previewTimer.Interval = TimeSpan.FromMilliseconds(Math.Max(10, _frameDelaysMs[_currentFrameIndex]));
             _previewTimer.Start();
-            PlayButton.Content = "⏸ 再生中";
+            PlayButton.Content = LocalizationService.Get("Playing");
         }
 
         private void Stop_Click(object sender, RoutedEventArgs e)
@@ -1140,7 +1140,7 @@ namespace Curio.Views.PaintEditor
         private void StopPreview()
         {
             _previewTimer.Stop();
-            if (PlayButton != null) PlayButton.Content = "▶ 再生";
+            if (PlayButton != null) PlayButton.Content = LocalizationService.Get("Play");
         }
 
         private void PreviewTimer_Tick(object? sender, EventArgs e)

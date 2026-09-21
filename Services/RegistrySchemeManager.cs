@@ -72,10 +72,10 @@ namespace Curio.Services
                 if (val is string regStr)
                 {
                     var paths = regStr.Split(',').ToList();
-                    bool managed = paths.Any(p => !string.IsNullOrEmpty(p) && 
-                        (p.StartsWith(baseAppDir, StringComparison.OrdinalIgnoreCase) || 
-                         p.StartsWith(defaultAppDir, StringComparison.OrdinalIgnoreCase) ||
-                         p.StartsWith(oldAppDir, StringComparison.OrdinalIgnoreCase)));
+                bool managed = paths.Any(p => !string.IsNullOrEmpty(p) &&
+                    (IsPathUnderDirectory(p, baseAppDir) ||
+                     IsPathUnderDirectory(p, defaultAppDir) ||
+                     IsPathUnderDirectory(p, oldAppDir)));
 
                     result.Add(new InstalledSchemeInfo
                     {
@@ -195,10 +195,14 @@ namespace Curio.Services
 
             if (applyImmediately && result.ErrorsCount == 0)
             {
-                ApplySchemeToSystem(schemeName, roleMappings, rolePaths, result.LogMessages);
+                if (!ApplySchemeToSystem(schemeName, roleMappings, rolePaths, result.LogMessages))
+                {
+                    result.ErrorsCount++;
+                    result.LogMessages.Add("[エラー] Windowsへのカーソル適用に失敗しました。");
+                }
             }
 
-            result.Success = true;
+            result.Success = result.ErrorsCount == 0;
             result.LogMessages.Add($"[完了] スキーム '{schemeName}' の一括インストールが終了しました。");
             return result;
         }
@@ -324,6 +328,21 @@ namespace Curio.Services
         {
             var invalidChars = Path.GetInvalidFileNameChars();
             return string.Concat(fileName.Select(c => invalidChars.Contains(c) ? '_' : c)).Trim();
+        }
+
+        private static bool IsPathUnderDirectory(string filePath, string directoryPath)
+        {
+            try
+            {
+                string file = Path.GetFullPath(filePath);
+                string directory = Path.GetFullPath(directoryPath)
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                return file.StartsWith(directory, StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

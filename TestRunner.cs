@@ -2,6 +2,9 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Curio.Models;
 using Curio.Services;
 
@@ -43,6 +46,8 @@ namespace Curio.Test
                 }
 
                 TestAniRoundTrip(tempDir);
+                TestCursorRoundTrip(tempDir);
+                TestGifImport(tempDir);
 
                 // 3. Test Matcher
                 var mappings = CursorMatcher.MatchRoles(scanResult.AllFiles);
@@ -149,6 +154,8 @@ namespace Curio.Test
             var settings = AppSettings.Load();
             string originalStyle = settings.UIStyle;
             string originalTheme = settings.Theme;
+            string originalLanguage = settings.Language;
+            string originalStorageDirectory = settings.StorageDirectory;
 
             try
             {
@@ -176,12 +183,31 @@ namespace Curio.Test
                     throw new Exception("AppSettings failed to persist XP style or Light theme!");
                 }
 
+                settings.Language = "en-US";
+                settings.StorageDirectory = Path.Combine(Path.GetTempPath(), "Curio_Settings_Test");
+                settings.Save();
+                var reloadedLocalization = AppSettings.Load();
+                if (!reloadedLocalization.Language.Equals("en-US", StringComparison.OrdinalIgnoreCase) ||
+                    !reloadedLocalization.StorageDirectory.Equals(settings.StorageDirectory, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new Exception("AppSettings failed to persist language or storage directory!");
+                }
+
                 Console.WriteLine("  - AppSettings settings.json persistence PASSED!");
+                StyleManager.Apply("Modern", "Light", "en-US");
+                if (!string.Equals(LocalizationService.Get("AppTitle"), "🖱️ Curio - Cursor Scheme Installer", StringComparison.Ordinal))
+                    throw new Exception("English localization resource failed!");
+                StyleManager.Apply("Modern", "Light", "ja-JP");
+                if (!string.Equals(LocalizationService.Get("AppTitle"), "🖱️ Curio - マウスカーソル一括インストーラー", StringComparison.Ordinal))
+                    throw new Exception("Japanese localization resource failed!");
+                Console.WriteLine("  - Localization resource switching PASSED!");
             }
             finally
             {
                 settings.UIStyle = originalStyle;
                 settings.Theme = originalTheme;
+                settings.Language = originalLanguage;
+                settings.StorageDirectory = originalStorageDirectory;
                 settings.Save();
             }
         }
@@ -268,6 +294,61 @@ namespace Curio.Test
                 throw new Exception("ANI round-trip pixel data failed!");
 
             Console.WriteLine("[1.5] ANI read/write round-trip PASSED!");
+        }
+
+        private static void TestCursorRoundTrip(string tempDir)
+        {
+            string curPath = Path.Combine(tempDir, "roundtrip.cur");
+            byte[] pixels = new byte[48 * 48 * 4];
+            int opaquePixel = (7 * 48 + 9) * 4;
+            pixels[opaquePixel] = 0x11;
+            pixels[opaquePixel + 1] = 0x22;
+            pixels[opaquePixel + 2] = 0x33;
+            pixels[opaquePixel + 3] = 0xFF;
+            var source = new CursorCanvasImage(48, 48, 12, 13, pixels);
+            CursorCanvasService.Write(curPath, source);
+            CursorCanvasImage result = CursorCanvasService.Read(curPath);
+
+            if (result.Width != 48 || result.Height != 48 || result.HotspotX != 12 || result.HotspotY != 13)
+                throw new Exception("CUR round-trip dimensions or hotspot failed!");
+            if (result.Bgra[opaquePixel] != 0x11 || result.Bgra[opaquePixel + 1] != 0x22 ||
+                result.Bgra[opaquePixel + 2] != 0x33 || result.Bgra[opaquePixel + 3] != 0xFF)
+                throw new Exception("CUR round-trip BGRA failed!");
+            if (result.Bgra[4 * 4 + 3] != 0)
+                throw new Exception("CUR round-trip transparency failed!");
+
+            Console.WriteLine("[1.6] CUR read/write round-trip PASSED!");
+        }
+
+        private static void TestGifImport(string tempDir)
+        {
+            string gifPath = Path.Combine(tempDir, "roundtrip.gif");
+            var first = new WriteableBitmap(16, 16, 96, 96, PixelFormats.Bgra32, null);
+            var second = new WriteableBitmap(16, 16, 96, 96, PixelFormats.Bgra32, null);
+            byte[] red = new byte[16 * 16 * 4];
+            byte[] blue = new byte[16 * 16 * 4];
+            for (int i = 0; i < red.Length; i += 4)
+            {
+                red[i + 2] = 0xFF;
+                red[i + 3] = 0xFF;
+                blue[i] = 0xFF;
+                blue[i + 3] = 0xFF;
+            }
+            first.WritePixels(new Int32Rect(0, 0, 16, 16), red, 16 * 4, 0);
+            second.WritePixels(new Int32Rect(0, 0, 16, 16), blue, 16 * 4, 0);
+
+            var encoder = new GifBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(first));
+            encoder.Frames.Add(BitmapFrame.Create(second));
+            using (var stream = File.Create(gifPath))
+                encoder.Save(stream);
+
+            AniCursorData result = GifAnimationReader.Read(gifPath);
+            if (result.Frames.Count != 2 || result.FrameDelaysMs.Count != 2 ||
+                result.Frames.Any(frame => frame.Width != 16 || frame.Height != 16))
+                throw new Exception("GIF frame import failed!");
+
+            Console.WriteLine("[1.7] GIF frame import PASSED!");
         }
 
         private static byte[] CreateDummyCursorBytes()

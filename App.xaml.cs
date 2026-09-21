@@ -17,9 +17,10 @@ namespace Curio
         {
             // Load saved settings
             Settings = AppSettings.Load();
+            ImportService.CleanTempExtracts();
 
             // Apply saved UI style and Theme on startup
-            StyleManager.Apply(Settings.UIStyle, Settings.Theme);
+            StyleManager.Apply(Settings.UIStyle, Settings.Theme, Settings.Language);
 
             if (e.Args.Contains("--test", StringComparer.OrdinalIgnoreCase))
             {

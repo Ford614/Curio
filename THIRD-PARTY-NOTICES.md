@@ -30,7 +30,7 @@ Curio uses Microsoft.Web.WebView2.
 - License: Microsoft / NuGet package license
 - Source: https://www.nuget.org/packages/Microsoft.Web.WebView2
 
-See the package's included license and notices for the applicable
-terms.
+The package license and bundled third-party notices are included in
+`ThirdParty/WebView2/LICENSE.txt` and `ThirdParty/WebView2/NOTICE.txt`.
 
 ---

@@ -172,7 +172,7 @@
                                                     <Setter
                                                         TargetName="ToggleBorder"
                                                         Property="Background"
-                                                        Value="#80D3EFFF"/>
+                                                        Value="{DynamicResource ControlHoverBackgroundBrush}"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
 
@@ -246,7 +246,7 @@
             <Trigger Property="IsHighlighted"
                      Value="True">
                 <Setter Property="Background"
-                        Value="#80D3EFFF"/>
+                        Value="{DynamicResource ControlHoverBackgroundBrush}"/>
             </Trigger>
 
             <!-- 選択中の項目 -->

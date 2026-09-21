@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,7 +11,7 @@ namespace Curio.Services
 {
     public static class StyleManager
     {
-        public static void Apply(string uiStyle, string theme)
+        public static void Apply(string uiStyle, string theme, string? language = null)
         {
             try
             {
@@ -47,14 +48,21 @@ namespace Curio.Services
 
                 // 3. Update MergedDictionaries
                 var themeUri = new Uri(themeSource, UriKind.RelativeOrAbsolute);
+                string languageCode = string.Equals(language, LocalizationService.English, StringComparison.OrdinalIgnoreCase)
+                    ? LocalizationService.English
+                    : LocalizationService.Japanese;
+                var languageUri = new Uri($"pack://application:,,,/Resources/Strings.{languageCode}.xaml", UriKind.Absolute);
                 var styleUri = new Uri(styleSource, UriKind.RelativeOrAbsolute);
 
                 var themeDict = new ResourceDictionary { Source = themeUri };
+                var languageDict = new ResourceDictionary { Source = languageUri };
                 var styleDict = new ResourceDictionary { Source = styleUri };
 
                 mergedDictionaries.Clear();
                 mergedDictionaries.Add(themeDict);
+                mergedDictionaries.Add(languageDict);
                 mergedDictionaries.Add(styleDict);
+                LocalizationService.SetCurrentLanguage(languageCode);
 
                 // MainWindow intentionally keeps the existing, small resource hook:
                 // its implicit Button style is based on AppButtonStyle.  Because
@@ -66,7 +74,7 @@ namespace Curio.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[StyleManager Error] {ex.Message}");
+                Trace.WriteLine($"[StyleManager Error] {ex}");
             }
         }
 

@@ -24,48 +24,48 @@
                 Padding="10"
                 Margin="0,0,0,12">
             <WrapPanel VerticalAlignment="Center">
-                <Button Content="新規32×32"
+                <Button Content="{DynamicResource EditorNew}"
                         Click="New_Click"
                         Margin="0,0,6,0"/>
-                <Button Content="開く"
+                <Button Content="{DynamicResource EditorOpen}"
                         Click="Open_Click"
                         Margin="0,0,6,0"/>
                 <Button x:Name="SaveButton"
-                        Content="保存"
+                        Content="{DynamicResource EditorSave}"
                         Click="Save_Click"
                         Background="{DynamicResource PrimaryAccentBrush}"
                         Foreground="{DynamicResource PrimaryAccentForegroundBrush}"
                         Margin="0,0,16,0"/>
-                <Button Content="戻る"
+                <Button Content="{DynamicResource EditorBack}"
                         Click="Back_Click"
                         Margin="0,0,16,0"/>
 
-                <TextBlock Text="ツール"
+                <TextBlock Text="{DynamicResource Tools}"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource TextSecondaryBrush}"
                            Margin="0,0,6,0"/>
                 <Button x:Name="PencilButton"
-                        Content="✎ ペン"
+                        Content="{DynamicResource Pencil}"
                         Click="Pencil_Click"
                         Margin="0,0,4,0"/>
                 <Button x:Name="EraserButton"
-                        Content="消しゴム"
+                        Content="{DynamicResource Eraser}"
                         Click="Eraser_Click"
                         Margin="0,0,4,0"/>
                 <Button x:Name="EyedropperButton"
-                        Content="スポイト"
+                        Content="{DynamicResource Eyedropper}"
                         Click="Eyedropper_Click"
                         Margin="0,0,4,0"/>
                 <Button x:Name="FillButton"
-                        Content="塗りつぶし"
+                        Content="{DynamicResource Fill}"
                         Click="Fill_Click"
                         Margin="0,0,4,0"/>
                 <Button x:Name="SelectButton"
-                        Content="選択"
+                        Content="{DynamicResource Select}"
                         Click="Select_Click"
                         Margin="0,0,16,0"/>
 
-                <TextBlock Text="ブラシ"
+                <TextBlock Text="{DynamicResource Brush}"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource TextSecondaryBrush}"
                            Margin="0,0,6,0"/>
@@ -80,26 +80,26 @@
                     <ComboBoxItem Content="6 px" Tag="6"/>
                 </ComboBox>
 
-                <Button Content="元に戻す"
+                <Button Content="{DynamicResource Undo}"
                         Click="Undo_Click"
                         x:Name="UndoButton"
                         Margin="0,0,4,0"/>
-                <Button Content="やり直す"
+                <Button Content="{DynamicResource Redo}"
                         Click="Redo_Click"
                         x:Name="RedoButton"/>
-                <Button Content="左右反転"
+                <Button Content="{DynamicResource FlipHorizontal}"
                         Click="FlipHorizontal_Click"
                         Margin="8,0,4,0"/>
-                <Button Content="上下反転"
+                <Button Content="{DynamicResource FlipVertical}"
                         Click="FlipVertical_Click"
                         Margin="0,0,4,0"/>
-                <Button Content="コピー"
+                <Button Content="{DynamicResource Copy}"
                         Click="CopySelection_Click"
                         Margin="0,0,4,0"/>
-                <Button Content="貼り付け"
+                <Button Content="{DynamicResource Paste}"
                         Click="PasteSelection_Click"
                         Margin="0,0,4,0"/>
-                <Button Content="選択範囲を削除"
+                <Button Content="{DynamicResource DeleteSelection}"
                         Click="DeleteSelection_Click"
                         Margin="0,0,4,0"/>
                 <ComboBox x:Name="CanvasSizeComboBox"
@@ -115,11 +115,11 @@
                     <ComboBoxItem Content="128×128" Tag="128"/>
                     <ComboBoxItem Content="256×256" Tag="256"/>
                 </ComboBox>
-                <Button Content="サイズ変更"
+                <Button Content="{DynamicResource Resize}"
                         Click="ResizeCanvas_Click"
                         Margin="0,0,8,0"/>
                 <CheckBox x:Name="GridCheckBox"
-                          Content="グリッド"
+                          Content="{DynamicResource Grid}"
                           IsChecked="True"
                           VerticalAlignment="Center"
                           Foreground="{DynamicResource TextPrimaryBrush}"
@@ -168,18 +168,18 @@
                             Height="512"
                             IsHitTestVisible="False"/>
                     <Line x:Name="HotspotVerticalLine"
-                          Stroke="#FFE05252"
+                          Stroke="#E05252"
                           StrokeThickness="1"
                           IsHitTestVisible="False"/>
                     <Line x:Name="HotspotHorizontalLine"
-                          Stroke="#FFE05252"
+                          Stroke="#E05252"
                           StrokeThickness="1"
                           IsHitTestVisible="False"/>
                     <Ellipse x:Name="HotspotMarker"
                              Width="9"
                              Height="9"
-                             Stroke="#FFFFFFFF"
-                             Fill="#FFE05252"
+                             Stroke="#FFFFFF"
+                             Fill="#E05252"
                              StrokeThickness="1"
                              IsHitTestVisible="False"/>
                 </Canvas>
@@ -196,14 +196,14 @@
                             Padding="12"
                             Margin="0,0,0,10">
                         <StackPanel>
-                            <TextBlock Text="色"
+                            <TextBlock Text="{DynamicResource Color}"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
                                 <Border x:Name="ColorPreview"
                                         Width="34"
                                         Height="34"
-                                        Background="#FFFFFFFF"
+                                        Background="#FFFFFF"
                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                         BorderThickness="1"
                                         CornerRadius="4"
@@ -213,20 +213,20 @@
                                          VerticalContentAlignment="Center"
                                          Text="#FFFFFF"
                                          ToolTip="#RRGGBB または #AARRGGBB"/>
-                                <Button Content="適用"
+                                <Button Content="{DynamicResource Apply}"
                                         Click="ApplyHexColor_Click"
                                         Margin="6,0,0,0"/>
                             </StackPanel>
                             <WrapPanel>
-                                <Button Width="26" Height="26" Padding="0" Background="#FF000000" Click="ColorSwatch_Click"/>
-                                <Button Width="26" Height="26" Padding="0" Background="#FFFFFFFF" Click="ColorSwatch_Click"/>
-                                <Button Width="26" Height="26" Padding="0" Background="#FFE05252" Click="ColorSwatch_Click"/>
-                                <Button Width="26" Height="26" Padding="0" Background="#FFF59E0B" Click="ColorSwatch_Click"/>
-                                <Button Width="26" Height="26" Padding="0" Background="#FF22C55E" Click="ColorSwatch_Click"/>
-                                <Button Width="26" Height="26" Padding="0" Background="#FF3B82F6" Click="ColorSwatch_Click"/>
-                                <Button Width="26" Height="26" Padding="0" Background="#FFA855F7" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#000000" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#FFFFFF" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#E05252" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#F59E0B" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#22C55E" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#3B82F6" Click="ColorSwatch_Click"/>
+                                <Button Width="26" Height="26" Padding="0" Background="#A855F7" Click="ColorSwatch_Click"/>
                             </WrapPanel>
-                            <TextBlock Text="不透明度"
+                            <TextBlock Text="{DynamicResource Opacity}"
                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                        Margin="0,12,0,2"/>
                             <Slider x:Name="AlphaSlider"
@@ -243,10 +243,10 @@
                             CornerRadius="{DynamicResource CardCornerRadius}"
                             Padding="12">
                         <StackPanel>
-                            <TextBlock Text="Hotspot"
+                            <TextBlock Text="{DynamicResource Hotspot}"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Text="カーソルのクリック位置"
+                            <TextBlock Text="{DynamicResource HotspotDescription}"
                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                        FontSize="11"
                                        Margin="0,2,0,8"/>
@@ -262,11 +262,11 @@
                                 <TextBlock Text="Y" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,6,0"/>
                                 <TextBox x:Name="HotspotYTextBox" Grid.Column="3" Text="0"/>
                             </Grid>
-                            <Button Content="座標を適用"
+                            <Button Content="{DynamicResource Apply}"
                                     Click="ApplyHotspot_Click"
                                     Margin="0,8,0,0"/>
                             <Button x:Name="SetHotspotButton"
-                                    Content="キャンバス上をクリックして設定"
+                                    Content="{DynamicResource SetHotspotOnCanvas}"
                                     Click="SetHotspot_Click"
                                     Margin="0,4,0,0"/>
                             <TextBlock x:Name="EditorStatusTextBlock"
@@ -297,19 +297,19 @@
                 </Grid.RowDefinitions>
                 <WrapPanel Grid.Row="0" VerticalAlignment="Center">
                     <Button x:Name="PlayButton"
-                            Content="▶ 再生"
+                            Content="{DynamicResource Play}"
                             Click="Play_Click"
                             Margin="0,0,4,0"/>
-                    <Button Content="■ 停止"
+                    <Button Content="{DynamicResource Stop}"
                             Click="Stop_Click"
                             Margin="0,0,12,0"/>
-                    <Button Content="空フレーム"
+                    <Button Content="{DynamicResource EmptyFrame}"
                             Click="AddEmptyFrame_Click"
                             Margin="0,0,4,0"/>
-                    <Button Content="複製"
+                    <Button Content="{DynamicResource Duplicate}"
                             Click="DuplicateFrame_Click"
                             Margin="0,0,4,0"/>
-                    <Button Content="削除"
+                    <Button Content="{DynamicResource Delete}"
                             Click="DeleteFrame_Click"
                             Margin="0,0,4,0"/>
                     <Button Content="↑"
@@ -318,7 +318,7 @@
                     <Button Content="↓"
                             Click="MoveFrameDown_Click"
                             Margin="0,0,12,0"/>
-                    <TextBlock Text="表示時間(ms)"
+                    <TextBlock Text="{DynamicResource DurationMs}"
                                VerticalAlignment="Center"
                                Foreground="{DynamicResource TextSecondaryBrush}"
                                Margin="0,0,6,0"/>
@@ -327,7 +327,7 @@
                              Text="100"
                              VerticalContentAlignment="Center"
                              Margin="0,0,4,0"/>
-                    <Button Content="適用"
+                            <Button Content="{DynamicResource Apply}"
                             Click="ApplyFrameDuration_Click"/>
                 </WrapPanel>
                 <ListBox x:Name="TimelineListBox"
@@ -349,7 +349,7 @@
 
         <TextBlock Grid.Row="3"
                    x:Name="FooterTextBlock"
-                   Text="左クリックで描画できます。"
+                   Text="{DynamicResource EditorFooter}"
                    Foreground="{DynamicResource TextSecondaryBrush}"
                    Margin="2,10,0,0"/>
     </Grid>

@@ -38,6 +38,8 @@ namespace Curio.Views
 
             WebUrlTextBox.Text = _settings.DefaultUrl;
             SettingsDefaultUrlTextBox.Text = _settings.DefaultUrl;
+            if (!string.IsNullOrWhiteSpace(_settings.StorageDirectory) && Path.IsPathFullyQualified(_settings.StorageDirectory))
+                RegistrySchemeManager.StorageDirectory = _settings.StorageDirectory;
             StoragePathTextBox.Text = RegistrySchemeManager.StorageDirectory;
             InstalledSchemesListView.ItemsSource = InstalledSchemes;
 
@@ -91,6 +93,10 @@ namespace Curio.Views
             else
                 UIStyleComboBox.SelectedIndex = 0; // Modern
 
+            LanguageComboBox.SelectedIndex = string.Equals(_settings.Language, LocalizationService.English, StringComparison.OrdinalIgnoreCase)
+                ? 1
+                : 0;
+
             UpdateTitleBarTheme();
         }
 
@@ -106,6 +112,18 @@ namespace Curio.Views
                 AppendLog($"[起動引数] {App.StartupFilePaths.Count} 個の入力パスを処理中...");
                 ProcessIncomingFiles(App.StartupFilePaths, isWebDownload: false);
             }
+        }
+
+        private void Window_Closed(object? sender, EventArgs e)
+        {
+            if (_isWebViewInitialized && WebViewControl.CoreWebView2 != null)
+            {
+                WebViewControl.CoreWebView2.DownloadStarting -= CoreWebView2_DownloadStarting;
+                WebViewControl.CoreWebView2.SourceChanged -= CoreWebView2_SourceChanged;
+            }
+
+            WebViewControl.Dispose();
+            ImportService.CleanTempExtracts();
         }
 
         private async Task InitializeWebViewAsync()
@@ -328,14 +346,14 @@ namespace Curio.Views
                 else
                 {
                     MainTabControl.SelectedIndex = 0; // Batch Installer tab
-                    MessageBox.Show($"カーソルファイルを {result.ImportedFiles.Count} 個取り込みました！\n役割の割り当てを確認して一括インストールしてください。", "取り込み完了", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(LocalizationService.Format("ImportComplete", result.ImportedFiles.Count), LocalizationService.Get("ImportCompleteTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             else
             {
                 if (result.ErrorCount > 0 || result.SkippedExecutablesCount > 0)
                 {
-                    MessageBox.Show($"カーソルファイルが見つからなかったか、セキュリティ除外されました。ログパネルをご確認ください。", "インポート通知", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(LocalizationService.Get("ImportWarning"), LocalizationService.Get("ImportWarningTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
         }
@@ -359,11 +377,11 @@ namespace Curio.Views
 
             if (success)
             {
-                MessageBox.Show("Curio を .cur / .ani / .zip ファイルのプログラムおよび「送る」メニューに登録しました。", "関連付け登録完了", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(LocalizationService.Get("AssociationComplete"), LocalizationService.Get("AssociationCompleteTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                MessageBox.Show("ファイル関連付けの登録に失敗しました。ログパネルをご確認ください。", "登録失敗", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(LocalizationService.Get("AssociationFailed"), LocalizationService.Get("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -396,8 +414,8 @@ namespace Curio.Views
             {
                 MessageBox.Show(
                     this,
-                    $"カーソルファイルを開けませんでした。\n{ex.Message}",
-                    "カーソル読み込みエラー",
+                    LocalizationService.Format("CursorOpenError", ex.Message),
+                    LocalizationService.Get("Error"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -407,7 +425,7 @@ namespace Curio.Views
         {
             if (DetectedFilesListBox.SelectedItem is not CursorFileInfo selectedFile)
             {
-                MessageBox.Show(this, "一括登録タブの検出ファイル一覧からCURを選択してください。", "CUR編集", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(this, LocalizationService.Get("NoCursorSelection"), LocalizationService.Get("Info"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -415,7 +433,7 @@ namespace Curio.Views
                  !string.Equals(selectedFile.Extension, ".ani", StringComparison.OrdinalIgnoreCase)) ||
                 !File.Exists(selectedFile.FilePath))
             {
-                MessageBox.Show(this, "選択されたファイルは編集可能なCUR/ANIファイルではありません。", "カーソル編集", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(this, LocalizationService.Get("NoEditableCursor"), LocalizationService.Get("Info"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -427,7 +445,7 @@ namespace Curio.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, $"カーソルファイルを開けませんでした。\n{ex.Message}", "カーソル読み込みエラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, LocalizationService.Format("CursorOpenError", ex.Message), LocalizationService.Get("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -534,7 +552,7 @@ namespace Curio.Views
             _settings.Theme = selectedTheme;
             _settings.Save();
 
-            StyleManager.Apply(_settings.UIStyle, _settings.Theme);
+            StyleManager.Apply(_settings.UIStyle, _settings.Theme, _settings.Language);
             UpdateTitleBarTheme();
             AppendLog($"[設定] テーマを変更: {selectedTheme}");
         }
@@ -575,9 +593,22 @@ namespace Curio.Views
             _settings.UIStyle = selectedStyle;
             _settings.Save();
 
-            StyleManager.Apply(_settings.UIStyle, _settings.Theme);
+            StyleManager.Apply(_settings.UIStyle, _settings.Theme, _settings.Language);
             UpdateTitleBarTheme();
             AppendLog($"[設定] UIスタイルを変更: {selectedStyle}");
+        }
+
+        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isInitializingControls) return;
+
+            _settings.Language = LanguageComboBox.SelectedIndex == 1
+                ? LocalizationService.English
+                : LocalizationService.Japanese;
+            _settings.Save();
+            StyleManager.Apply(_settings.UIStyle, _settings.Theme, _settings.Language);
+            InitializeRoleMappings(preserveAssignments: true);
+            Title = LocalizationService.Get("WindowTitle", "Curio");
         }
 
         private void Donate_Click(object sender, RoutedEventArgs e)
@@ -614,12 +645,20 @@ namespace Curio.Views
 
         #region Original Batch Installer & Scheme Management Logic
 
-        private void InitializeRoleMappings()
+        private void InitializeRoleMappings(bool preserveAssignments = false)
         {
+            Dictionary<string, CursorFileInfo?> existingAssignments = preserveAssignments
+                ? RoleMappings.ToDictionary(mapping => mapping.Role.RegistryKey, mapping => mapping.SelectedFile, StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, CursorFileInfo?>(StringComparer.OrdinalIgnoreCase);
             RoleMappings.Clear();
             foreach (var role in CursorRole.GetStandardRoles())
             {
-                RoleMappings.Add(new CursorRoleMapping(role));
+                role.DisplayName = LocalizationService.GetRoleDisplayName(role.RegistryKey, role.DisplayName);
+                role.Description = LocalizationService.GetRoleDescription(role.RegistryKey, role.Description);
+                var mapping = new CursorRoleMapping(role);
+                if (existingAssignments.TryGetValue(role.RegistryKey, out CursorFileInfo? selectedFile))
+                    mapping.SelectedFile = selectedFile;
+                RoleMappings.Add(mapping);
             }
             RoleMappingDataGrid.ItemsSource = RoleMappings;
         }
@@ -660,6 +699,8 @@ namespace Curio.Views
                 {
                     StoragePathTextBox.Text = dialog.FolderName;
                     RegistrySchemeManager.StorageDirectory = dialog.FolderName;
+                    _settings.StorageDirectory = dialog.FolderName;
+                    _settings.Save();
                     AppendLog($"[設定] 保存先フォルダを '{dialog.FolderName}' に変更しました。");
                 }
             }
@@ -674,6 +715,8 @@ namespace Curio.Views
             string defaultPath = RegistrySchemeManager.GetDefaultStorageDirectory();
             StoragePathTextBox.Text = defaultPath;
             RegistrySchemeManager.StorageDirectory = defaultPath;
+            _settings.StorageDirectory = defaultPath;
+            _settings.Save();
             AppendLog($"[設定] 保存先フォルダをデフォルト ({defaultPath}) にリセットしました。");
         }
 
@@ -683,6 +726,16 @@ namespace Curio.Views
             if (!string.IsNullOrWhiteSpace(newPath))
             {
                 RegistrySchemeManager.StorageDirectory = newPath;
+            }
+        }
+
+        private void StoragePathTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            string newPath = StoragePathTextBox.Text.Trim();
+            if (!string.IsNullOrWhiteSpace(newPath) && Path.IsPathFullyQualified(newPath))
+            {
+                _settings.StorageDirectory = newPath;
+                _settings.Save();
             }
         }
 
@@ -826,14 +879,14 @@ namespace Curio.Views
             string schemeName = SchemeNameTextBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(schemeName))
             {
-                MessageBox.Show("スキーム名を入力してください。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(LocalizationService.Get("SchemeNameRequired", "スキーム名を入力してください。"), LocalizationService.Get("Warning"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             int assignedCount = RoleMappings.Count(m => m.IsAssigned);
             if (assignedCount == 0)
             {
-                MessageBox.Show("少なくとも1つのカーソル役割にファイルを割り当ててください。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(LocalizationService.Get("NoRoleAssigned"), LocalizationService.Get("Warning"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -865,12 +918,12 @@ namespace Curio.Views
 
             if (result.Success)
             {
-                MessageBox.Show($"カーソルスキーム '{schemeName}' を登録しました！\nWindowsの「マウスのプロパティ -> ポインター」からいつでも選択できます。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(LocalizationService.Format("SchemeInstalled", schemeName), LocalizationService.Get("Info"), MessageBoxButton.OK, MessageBoxImage.Information);
                 LoadInstalledSchemes();
             }
             else
             {
-                MessageBox.Show($"スキームの登録中にエラーが発生しました。ログをご確認ください。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(LocalizationService.Get("InstallFailed"), LocalizationService.Get("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -926,7 +979,7 @@ namespace Curio.Views
 
                 if (success)
                 {
-                    MessageBox.Show($"スキーム '{scheme.Name}' を反映しました。", "適用完了", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(LocalizationService.Format("SchemeApplied", scheme.Name), LocalizationService.Get("Info"), MessageBoxButton.OK, MessageBoxImage.Information);
                     LoadInstalledSchemes();
                 }
             }
@@ -936,7 +989,7 @@ namespace Curio.Views
         {
             if (InstalledSchemesListView.SelectedItem is InstalledSchemeInfo scheme)
             {
-                var confirm = MessageBox.Show($"登録済みスキーム '{scheme.Name}' をアンインストールしますか？\n（レジストリ設定およびコピーされたファイルが削除されます）", "削除確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var confirm = MessageBox.Show(LocalizationService.Format("DeleteConfirm", scheme.Name), LocalizationService.Get("Warning"), MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (confirm == MessageBoxResult.Yes)
                 {
                     var logs = new List<string>();
@@ -945,7 +998,7 @@ namespace Curio.Views
 
                     if (success)
                     {
-                        MessageBox.Show($"スキーム '{scheme.Name}' を削除しました。", "削除完了", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show(LocalizationService.Format("SchemeDeleted", scheme.Name), LocalizationService.Get("Info"), MessageBoxButton.OK, MessageBoxImage.Information);
                         LoadInstalledSchemes();
                     }
                 }

@@ -128,9 +128,23 @@ namespace Curio.Services
 
         private static void ProcessFile(string filePath, ImportResult result, HashSet<string> processedPaths)
         {
-            if (processedPaths.Contains(filePath)) return;
+            try
+            {
+                ProcessFileCore(filePath, result, processedPaths);
+            }
+            catch (Exception ex)
+            {
+                result.LogMessages.Add($"[エラー] ファイルを処理できませんでした '{filePath}': {ex.Message}");
+                result.ErrorCount++;
+            }
+        }
 
-            string extension = Path.GetExtension(filePath).ToLowerInvariant();
+        private static void ProcessFileCore(string filePath, ImportResult result, HashSet<string> processedPaths)
+        {
+            string canonicalPath = Path.GetFullPath(filePath);
+            if (processedPaths.Contains(canonicalPath)) return;
+
+            string extension = Path.GetExtension(canonicalPath).ToLowerInvariant();
 
             // 1. Security Check: Executables
             if (IsExecutableExtension(extension))
@@ -141,7 +155,7 @@ namespace Curio.Services
             }
 
             // 2. Security Check: File Size Limit
-            var fileInfo = new FileInfo(filePath);
+            var fileInfo = new FileInfo(canonicalPath);
             if (fileInfo.Length > MaxSingleFileSizeBytes)
             {
                 result.LogMessages.Add($"[エラー] ファイルサイズが上限 (50MB) を超えています: {Path.GetFileName(filePath)} ({fileInfo.Length / 1024 / 1024}MB)");
@@ -161,17 +175,17 @@ namespace Curio.Services
             {
                 try
                 {
-                    var preview = CursorPreviewRenderer.CreatePreview(filePath);
+                    var preview = CursorPreviewRenderer.CreatePreview(canonicalPath);
                     var item = new CursorFileInfo
                     {
-                        FilePath = filePath,
+                        FilePath = canonicalPath,
                         FileName = fileInfo.Name,
                         Extension = extension,
                         Preview = preview
                     };
 
                     result.ImportedFiles.Add(item);
-                    processedPaths.Add(filePath);
+                    processedPaths.Add(canonicalPath);
                     result.LogMessages.Add($"[成功] カーソル検出: {fileInfo.Name}");
                 }
                 catch (Exception ex)
