@@ -42,28 +42,6 @@ Web配布サイトからのダウンロード自動検出、ドラッグ＆ド�
 
 ---
 
-## 🚀 ビルド方法
-
-### コマンドラインでのビルド
-
-1. **プロジェクトフォルダへ移動**
-   ```powershell
-   cd s:\Work\Program\Projects\App\Curio
-   ```
-
-2. **リリースビルドの実行**
-   ```powershell
-   dotnet build -c Release
-   ```
-   ビルド成果物は `bin\Release\net10.0-windows\Curio.exe` に出力されます。
-
-3. **単一 EXE ファイルとしてのパブリッシュ (配布用)**
-   ```powershell
-   dotnet publish -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true
-   ```
-
----
-
 ## 📖 使い方
 
 ### 1. UIスタイルおよびテーマの設定
