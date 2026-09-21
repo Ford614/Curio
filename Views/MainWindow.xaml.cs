@@ -592,7 +592,7 @@ namespace Curio.Views
 
         private void GitHub_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://github.com");
+            OpenBrowser("https://github.com/Ford614/Curio");
         }
 
         private static void OpenBrowser(string url)
